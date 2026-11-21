@@ -1,39 +1,44 @@
-# 19. NAAM (നാം) — Sample Data and Field Photographs Management
+# 19. NAAM (നാം) — Sample Data and Demonstration Credentials
 
-## 1. Directory Structure
+## 1. Official Demonstration Accounts
+To evaluate the platform across all four role-based access portals, use the following pre-configured demonstration accounts:
 
-```text
-sample-data/
-├── field_photos/
-│   ├── waste_management/        # Roadside dump sites, plastic accumulation in canals
-│   ├── water_pollution/         # Industrial effluents, algae blooms, well contamination
-│   ├── drainage/                 # Silted urban storm drains, clogged culverts
-│   ├── flooding/                 # Waterlogged junctions, monsoon overflow points
-│   └── other/                    # Soil erosion, illegal quarrying, tree falls
-├── metadata/
-│   └── field_photos.csv          # Metadata ledger with authentic Kerala coordinates
-└── demo_data/
-    ├── demo_users.json           # Seed users for Community, Authority, Officer, and Admin
-    ├── demo_departments.json     # LSGD, Suchitwa Mission, KSPCB, Irrigation
-    ├── demo_complaints.json      # Structured complaints across Kerala districts
-    └── demo_alerts.json          # Official warnings and community notices
-```
+| Role | Portal Route | Email / Identifier | Password | Description |
+|---|---|---|---|---|
+| **Citizen (പൗരൻ)** | `/login/community` | `anjali.nair@example.com` *(or `+919876543210`)* | `StrongPassword123!` | Submits grievances, uploads photos, tracks progress |
+| **Authority (അധികാരി)** | `/login/authority` | `officer.lsgd@kerala.gov.in` | `AuthorityPass2026!` | Reviews triage queue, assigns tasks, broadcasts alerts |
+| **Field Officer (ഫീൽഡ് ഓഫീസർ)** | `/login/officer` | `field.kochi@kerala.gov.in` | `OfficerPass2026!` | Inspects sites, uses GPS routing, submits resolution proof |
+| **Super Admin (സിസ്റ്റം അഡ്മിൻ)** | `/login/admin` | `admin@naam.kerala.gov.in` | `AdminPass2026!` | Telemetry KPIs, role management, department config, audit logs |
 
 ---
 
-## 2. Field Photograph Metadata Schema (`metadata/field_photos.csv`)
-Each sample photo is indexed with rigorous metadata to distinguish genuine field observations from simulated records:
+## 2. Sample Demonstration Workflows & Tracking Codes
 
-| Field | Description | Example |
-|---|---|---|
-| `photo_id` | Unique identifier | `PHT-KL-EKM-001` |
-| `filename` | File path | `waste_management/ekm_vyttila_plastic.jpg` |
-| `category` | Environmental category | `SOLID_WASTE` |
-| `district` | Kerala district | `Ernakulam` |
-| `lsgd_name` | Local Self-Government unit | `Kochi Municipal Corporation` |
-| `latitude` | Accurate coordinate | `9.9675` |
-| `longitude` | Accurate coordinate | `76.3184` |
-| `caption_ml` | Malayalam description | വൈറ്റില ജംഗ്ഷനിലെ പ്ലാസ്റ്റിക് മാലിന്യക്കൂമ്പാരം |
-| `caption_en` | English description | Plastic waste accumulation near Vyttila junction |
-| `data_type` | Data classification | `REAL_FIELD_OBSERVATION` or `SIMULATED_DEMO` |
-| `consent_verified` | Privacy verification | `YES` |
+### Live Public Tracking Codes
+* **`NAAM-2026-10001`**: Plastic Dumping near Connolly Canal, Kozhikode (`RESOLVED` with before/after evidence photos).
+* **`NAAM-2026-10002`**: Chemical Effluent in Periyar River, Aluva, Ernakulam (`IN_PROGRESS` - inspection assigned).
+* **`NAAM-2026-10003`**: Silted Storm Drain Clogging, Palakkad Municipal Market (`SUBMITTED` - awaiting triage).
+
+---
+
+## 3. Curated Sample Field Photos & Kerala Coordinates
+All demonstration records utilize authentic geographical coordinates within Kerala's administrative boundaries (`Lat 8.0°–13.0° N`, `Lon 74.5°–77.8° E`):
+
+| District | LSGD Name | Coordinates | Category | Sample Issue |
+|---|---|---|---|---|
+| **Ernakulam** | Kochi Corporation | `9.9312° N, 76.2673° E` | `SOLID_WASTE` | Packaging waste pile in Marine Drive walkway |
+| **Thiruvananthapuram** | Trivandrum Corporation | `8.5241° N, 76.9366° E` | `WATER_POLLUTION` | Parvathi Puthanar canal weed and sewage accumulation |
+| **Kozhikode** | Kozhikode Corporation | `11.2588° N, 75.7804° E` | `DRAINAGE` | Blocked culvert causing monsoon street waterlogging |
+| **Alappuzha** | Alappuzha Municipality | `9.4981° N, 76.3388° E` | `FLOODING` | Low-lying canal bund breach near Kuttanad border |
+| **Wayanad** | Vythiri Grama Panchayat | `11.5524° N, 76.0435° E` | `DEFORESTATION` | Illegal slope cutting and soil dumping |
+| **Thrissur** | Thrissur Corporation | `10.5276° N, 76.2144° E` | `SOLID_WASTE` | Shakthan Thampuran vegetable market organic waste |
+
+---
+
+## 4. Seeding Demo Data
+To seed these demonstration accounts and baseline departments into a fresh development database:
+
+```powershell
+cd backend
+.\.venv\Scripts\python.exe scripts/seed_demo_users.py
+```
