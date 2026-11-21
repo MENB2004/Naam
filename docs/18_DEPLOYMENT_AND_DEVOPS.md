@@ -37,16 +37,21 @@ The NAAM platform is engineered as a modern, decoupled cloud application with hi
 ## 2. Cloud Deployment Targets
 
 ### A. Frontend on Vercel
-1. **Repository Connection:**
+1. **Live Production Status:**
+   - **Production URL:** [https://frontend-nine-orpin-72.vercel.app](https://frontend-nine-orpin-72.vercel.app)
+   - **Deployment Inspect:** [https://vercel.com/menbs-projects/frontend](https://vercel.com/menbs-projects/frontend)
+   - **Project Name:** `menbs-projects/frontend`
+   - **Status:** Deployed & Ready (`READY`, HTTP 200)
+2. **Repository Connection:**
    - Link the GitHub repository: `https://github.com/MENB2004/Naam.git`.
    - Root Directory: `frontend`.
    - Build Command: `npm run build`.
    - Output Directory: `dist`.
-2. **Configuration (`frontend/vercel.json`):**
+3. **Configuration (`frontend/vercel.json`):**
    - Automatically handles Single-Page Application (SPA) routing fallbacks to `/index.html`.
    - Re-routes `/api/v1/:path*` directly to the production backend ASGI host.
    - Applies security headers (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`).
-3. **Environment Variables on Vercel:**
+4. **Environment Variables on Vercel:**
    - `VITE_API_URL`: `/api/v1` (or full backend URL `https://naam-backend.onrender.com/api/v1`).
 
 ---
