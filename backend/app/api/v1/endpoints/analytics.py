@@ -1,21 +1,21 @@
 import csv
 import io
-from datetime import datetime, timedelta, timezone
-from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, Response, status
-from sqlalchemy import func, case
+from datetime import UTC, datetime, timedelta
+
+from fastapi import APIRouter, Depends, Query, Response
+from sqlalchemy import case, func
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models.complaint import Complaint, ComplaintUpdate
-from app.models.location import Location
 from app.models.alert import Alert
+from app.models.complaint import Complaint
+from app.models.location import Location
 from app.schemas.analytics import (
     AnalyticsOverview,
+    AnalyticsSummaryResponse,
     CategoryDistribution,
     DistrictMetric,
     TrendPoint,
-    AnalyticsSummaryResponse,
 )
 
 router = APIRouter()
@@ -52,9 +52,7 @@ KERALA_DISTRICTS = {
 def compute_overview_data(db: Session) -> AnalyticsOverview:
     total_complaints = db.query(func.count(Complaint.id)).scalar() or 0
     resolved_complaints = (
-        db.query(func.count(Complaint.id))
-        .filter(Complaint.current_status == "RESOLVED")
-        .scalar()
+        db.query(func.count(Complaint.id)).filter(Complaint.current_status == "RESOLVED").scalar()
         or 0
     )
     in_progress_complaints = (
@@ -71,9 +69,7 @@ def compute_overview_data(db: Session) -> AnalyticsOverview:
     )
 
     resolution_rate = (
-        round((resolved_complaints / total_complaints) * 100.0, 1)
-        if total_complaints > 0
-        else 0.0
+        round((resolved_complaints / total_complaints) * 100.0, 1) if total_complaints > 0 else 0.0
     )
 
     # Calculate average resolution time across resolved complaints
@@ -94,9 +90,7 @@ def compute_overview_data(db: Session) -> AnalyticsOverview:
         if durations:
             avg_hours = round(sum(durations) / len(durations), 1)
 
-    active_alerts = (
-        db.query(func.count(Alert.id)).filter(Alert.is_active == True).scalar() or 0
-    )
+    active_alerts = db.query(func.count(Alert.id)).filter(Alert.is_active == True).scalar() or 0
 
     return AnalyticsOverview(
         total_complaints=total_complaints,
@@ -109,13 +103,9 @@ def compute_overview_data(db: Session) -> AnalyticsOverview:
     )
 
 
-def compute_categories_data(db: Session) -> List[CategoryDistribution]:
+def compute_categories_data(db: Session) -> list[CategoryDistribution]:
     total_count = db.query(func.count(Complaint.id)).scalar() or 0
-    rows = (
-        db.query(Complaint.category, func.count(Complaint.id))
-        .group_by(Complaint.category)
-        .all()
-    )
+    rows = db.query(Complaint.category, func.count(Complaint.id)).group_by(Complaint.category).all()
     counts = {cat: count for cat, count in rows}
 
     distributions = []
@@ -153,14 +143,12 @@ def compute_categories_data(db: Session) -> List[CategoryDistribution]:
     return distributions
 
 
-def compute_districts_data(db: Session) -> List[DistrictMetric]:
+def compute_districts_data(db: Session) -> list[DistrictMetric]:
     results = (
         db.query(
             Location.district,
             func.count(Complaint.id).label("total"),
-            func.sum(
-                case((Complaint.current_status == "RESOLVED", 1), else_=0)
-            ).label("resolved"),
+            func.sum(case((Complaint.current_status == "RESOLVED", 1), else_=0)).label("resolved"),
         )
         .join(Complaint, Complaint.location_id == Location.id)
         .group_by(Location.district)
@@ -202,8 +190,8 @@ def compute_districts_data(db: Session) -> List[DistrictMetric]:
     return metrics
 
 
-def compute_trends_data(db: Session, days: int = 14) -> List[TrendPoint]:
-    now = datetime.now(timezone.utc)
+def compute_trends_data(db: Session, days: int = 14) -> list[TrendPoint]:
+    now = datetime.now(UTC)
     start_date = now - timedelta(days=days - 1)
 
     complaints = (
@@ -240,19 +228,19 @@ def get_analytics_overview(db: Session = Depends(get_db)):
     return compute_overview_data(db)
 
 
-@router.get("/categories", response_model=List[CategoryDistribution])
+@router.get("/categories", response_model=list[CategoryDistribution])
 def get_category_distribution(db: Session = Depends(get_db)):
     """Environmental complaint breakdown by category with bilingual metadata."""
     return compute_categories_data(db)
 
 
-@router.get("/districts", response_model=List[DistrictMetric])
+@router.get("/districts", response_model=list[DistrictMetric])
 def get_district_metrics(db: Session = Depends(get_db)):
     """District performance and resolution rate across all 14 Kerala districts."""
     return compute_districts_data(db)
 
 
-@router.get("/trends", response_model=List[TrendPoint])
+@router.get("/trends", response_model=list[TrendPoint])
 def get_resolution_trends(
     days: int = Query(default=14, ge=7, le=90), db: Session = Depends(get_db)
 ):

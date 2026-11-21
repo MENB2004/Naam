@@ -1,9 +1,6 @@
 import uuid
-import pytest
+
 from fastapi.testclient import TestClient
-from tests.conftest import TestingSessionLocal
-from app.models.auth import User, Role, UserRole
-from app.core.security import get_password_hash
 
 
 def test_bilingual_registration_and_preference(client: TestClient):

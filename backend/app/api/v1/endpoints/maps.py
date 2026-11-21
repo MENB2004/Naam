@@ -1,15 +1,29 @@
 import math
-import uuid
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status as http_status
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import status as http_status
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
+
 from app.core.database import get_db
 from app.models.complaint import Complaint, Evidence
-from app.models.location import Location
 from app.models.department import Department
-from app.schemas.complaint import CATEGORY_ML_MAP, STATUS_ML_MAP, KERALA_MIN_LAT, KERALA_MAX_LAT, KERALA_MIN_LON, KERALA_MAX_LON
-from app.schemas.map import MapPoint, MapClustersResponse, GeoJsonFeature, GeoJsonFeatureCollection, PublicMapSummary
+from app.models.location import Location
+from app.schemas.complaint import (
+    CATEGORY_ML_MAP,
+    KERALA_MAX_LAT,
+    KERALA_MAX_LON,
+    KERALA_MIN_LAT,
+    KERALA_MIN_LON,
+    STATUS_ML_MAP,
+)
+from app.schemas.map import (
+    GeoJsonFeature,
+    GeoJsonFeatureCollection,
+    MapClustersResponse,
+    MapPoint,
+    PublicMapSummary,
+)
 
 router = APIRouter()
 
@@ -29,7 +43,9 @@ def get_public_map_summary(db: Session = Depends(get_db)):
         )
     )
     total = public_reports.count()
-    active = public_reports.filter(Complaint.current_status.notin_(["RESOLVED", "REJECTED"])).count()
+    active = public_reports.filter(
+        Complaint.current_status.notin_(["RESOLVED", "REJECTED"])
+    ).count()
     resolved = public_reports.filter(Complaint.current_status == "RESOLVED").count()
     category_counts = (
         db.query(Complaint.category, func.count(Complaint.id))
@@ -63,7 +79,9 @@ def get_public_map_summary(db: Session = Depends(get_db)):
         "active_complaints": active,
         "resolved_complaints": resolved,
         "active_departments": db.query(Department).filter(Department.is_active.is_(True)).count(),
-        "categories": [{"category": category, "count": count} for category, count in category_counts],
+        "categories": [
+            {"category": category, "count": count} for category, count in category_counts
+        ],
         "recent_reports": [
             {
                 "id": complaint.id,
@@ -91,11 +109,13 @@ def haversine_distance_km(lat1: float, lon1: float, lat2: float, lon2: float) ->
     return r * c
 
 
-def get_first_image_url(evidence_list: List[Evidence]) -> Optional[str]:
+def get_first_image_url(evidence_list: list[Evidence]) -> str | None:
     for ev in evidence_list:
         if ev.file_type and ev.file_type.startswith("image/"):
             return ev.file_url
-        if ev.file_url and any(ev.file_url.lower().endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp"]):
+        if ev.file_url and any(
+            ev.file_url.lower().endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp"]
+        ):
             return ev.file_url
     if evidence_list:
         return evidence_list[0].file_url
@@ -104,13 +124,13 @@ def get_first_image_url(evidence_list: List[Evidence]) -> Optional[str]:
 
 @router.get("/clusters", response_model=MapClustersResponse)
 def get_map_clusters(
-    min_lat: Optional[float] = Query(None, description="Bounding box minimum latitude"),
-    max_lat: Optional[float] = Query(None, description="Bounding box maximum latitude"),
-    min_lng: Optional[float] = Query(None, description="Bounding box minimum longitude"),
-    max_lng: Optional[float] = Query(None, description="Bounding box maximum longitude"),
-    category: Optional[str] = Query(None, description="Filter by category"),
-    status: Optional[str] = Query(None, description="Filter by status (or ACTIVE)"),
-    district: Optional[str] = Query(None, description="Filter by Kerala district"),
+    min_lat: float | None = Query(None, description="Bounding box minimum latitude"),
+    max_lat: float | None = Query(None, description="Bounding box maximum latitude"),
+    min_lng: float | None = Query(None, description="Bounding box minimum longitude"),
+    max_lng: float | None = Query(None, description="Bounding box maximum longitude"),
+    category: str | None = Query(None, description="Filter by category"),
+    status: str | None = Query(None, description="Filter by status (or ACTIVE)"),
+    district: str | None = Query(None, description="Filter by Kerala district"),
     limit: int = Query(300, ge=1, le=1000),
     db: Session = Depends(get_db),
 ):
@@ -162,8 +182,8 @@ def get_map_clusters(
 
     complaints = query.order_by(Complaint.created_at.desc()).limit(limit).all()
 
-    points: List[MapPoint] = []
-    features: List[GeoJsonFeature] = []
+    points: list[MapPoint] = []
+    features: list[GeoJsonFeature] = []
 
     for c in complaints:
         if not c.location:
@@ -226,13 +246,13 @@ def get_map_clusters(
     )
 
 
-@router.get("/nearby", response_model=List[MapPoint])
+@router.get("/nearby", response_model=list[MapPoint])
 def get_nearby_complaints(
     lat: float = Query(..., description="Target point latitude"),
     lng: float = Query(..., description="Target point longitude"),
     radius_km: float = Query(10.0, ge=0.5, le=100.0, description="Search radius in kilometers"),
-    category: Optional[str] = Query(None, description="Optional category filter"),
-    status: Optional[str] = Query(None, description="Optional status filter"),
+    category: str | None = Query(None, description="Optional category filter"),
+    status: str | None = Query(None, description="Optional status filter"),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
@@ -250,7 +270,7 @@ def get_nearby_complaints(
     # 1 deg lat ≈ 111 km; 1 deg lon ≈ 111 * cos(lat) km
     lat_delta = (radius_km / 111.0) * 1.15
     cos_lat = math.cos(math.radians(lat))
-    lon_delta = (radius_km / (111.0 * (cos_lat if cos_lat > 0.1 else 0.1))) * 1.15
+    lon_delta = (radius_km / (111.0 * (max(0.1, cos_lat)))) * 1.15
 
     query = (
         db.query(Complaint)
@@ -279,7 +299,7 @@ def get_nearby_complaints(
 
     candidates = query.all()
 
-    results: List[MapPoint] = []
+    results: list[MapPoint] = []
     for c in candidates:
         if not c.location:
             continue

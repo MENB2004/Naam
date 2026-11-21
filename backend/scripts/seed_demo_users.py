@@ -7,17 +7,16 @@ This script deliberately refuses non-SQLite databases so demo passwords cannot
 be seeded into a production PostgreSQL database by accident.
 """
 
-import uuid
 import sys
+import uuid
 
+from seed_master_data import seed_master_data
 from sqlalchemy import select
 
 from app.core.config import settings
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import get_password_hash
-from app.models import Department, Role, User, UserRole  # noqa: F401
-from seed_master_data import seed_master_data
-
+from app.models import Department, Role, User, UserRole
 
 DEMO_USERS = [
     {
@@ -79,9 +78,7 @@ def seed_demo_users() -> None:
                     raise RuntimeError(f"Missing required department: {account['department']}")
                 department_id = department.id
 
-            user = session.scalars(
-                select(User).where(User.email == account["email"])
-            ).first()
+            user = session.scalars(select(User).where(User.email == account["email"])).first()
             if user is None:
                 user = User(id=uuid.uuid4(), email=account["email"])
                 session.add(user)

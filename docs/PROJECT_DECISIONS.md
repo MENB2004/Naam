@@ -15,6 +15,7 @@
 - **ADR-012:** Approved Super Admin Console Architecture (`/admin`) with role-based privilege enforcement (`SUPER_ADMIN`), user role reassignment and activation toggling, department master configuration, system telemetry KPI cards, and immutable security audit log recording with actor IP and JSON event metadata.
 - **ADR-013:** Approved Environmental Analytics & Intelligence Architecture (`/analytics`) utilizing Recharts (category distribution pie chart, intake vs resolution trend area chart, and 14 Kerala district performance bar chart), combined payload endpoint (`GET /api/v1/analytics/summary`), and UTF-8-BOM CSV export.
 - **ADR-014:** Approved Full Bilingual Architecture & WCAG 2.1 AA Accessibility Standards with 7 modular JSON locale dictionaries (`common`, `auth`, `community`, `complaints`, `authority`, `admin`, `analytics`), user language preference persistence (`users.preferred_language`, `PATCH /auth/me/language`), bilingual error handling middleware, and keyboard navigation enhancements (`SkipToContent`, ARIA labels).
+- **ADR-015:** Approved Security Hardening, Rate Limiting, and Full End-to-End Integration Architecture with SlowAPI rate limiting, standard OWASP security header middleware (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, etc.), XSS sanitization on complaint submission, and comprehensive E2E journey testing.
 
 ## 2. User Approvals Log
 | Date | Milestone / Phase | Decision / Instruction | Approved By |
@@ -34,3 +35,4 @@
 | 2026-11-22 | Phase 10: Super Admin Dashboard | Admin telemetry KPIs, user role & activation management, department editor, security audit log viewer, 35/35 tests passing. | User Approved ("do phase 10") |
 | 2026-11-22 | Phase 11: Analytics & Reporting | Analytics dashboard (/analytics), Recharts category distribution, trend area chart, district bar chart, CSV report export, 43/43 tests passing. | Executed & Verified |
 | 2026-11-22 | Phase 12: Bilingual & Accessibility | Modular JSON dictionaries (7 modules), user language persistence in DB, bilingual error middleware, SkipToContent component, 45/45 tests passing. | User Approved ("do phase 12") |
+| 2026-11-22 | Phase 13: Security & Integration | Security header middleware, SlowAPI rate limiting, XSS input sanitization, complete E2E lifecycle journey, 52/52 tests passing. | User Approved ("yes") |

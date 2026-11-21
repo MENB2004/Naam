@@ -1,10 +1,11 @@
 import uuid
-import pytest
-from app.models.auth import User, Role
+
+from app.models.auth import Role, User
 
 
 def create_user_with_role(client, session, email, role_name, full_name):
     from app.models.auth import UserRole
+
     # Check if role exists
     role = session.query(Role).filter(Role.name == role_name).first()
     if not role:
@@ -20,6 +21,7 @@ def create_user_with_role(client, session, email, role_name, full_name):
     user = session.query(User).filter(User.email == email).first()
     if not user:
         from app.core.security import get_password_hash
+
         user = User(
             id=uuid.uuid4(),
             full_name=full_name,
@@ -42,10 +44,17 @@ def create_user_with_role(client, session, email, role_name, full_name):
 
 def test_full_complaint_lifecycle(client):
     from tests.conftest import TestingSessionLocal
+
     with TestingSessionLocal() as session:
-        citizen_token, citizen_id = create_user_with_role(client, session, "citizen.lifecycle@example.com", "COMMUNITY", "ലളിത കുമാരി")
-        authority_token, _ = create_user_with_role(client, session, "authority.lifecycle@example.com", "AUTHORITY", "എക്സിക്യൂട്ടീവ് എൻജിനീയർ")
-        officer_token, _ = create_user_with_role(client, session, "officer.lifecycle@example.com", "OFFICER", "വാർഡ് ഫീൽഡ് ഇൻസ്പെക്ടർ")
+        citizen_token, _citizen_id = create_user_with_role(
+            client, session, "citizen.lifecycle@example.com", "COMMUNITY", "ലളിത കുമാരി"
+        )
+        authority_token, _ = create_user_with_role(
+            client, session, "authority.lifecycle@example.com", "AUTHORITY", "എക്സിക്യൂട്ടീവ് എൻജിനീയർ"
+        )
+        officer_token, _ = create_user_with_role(
+            client, session, "officer.lifecycle@example.com", "OFFICER", "വാർഡ് ഫീൽഡ് ഇൻസ്പെക്ടർ"
+        )
 
     # 1. Citizen creates complaint -> SUBMITTED
     create_payload = {
@@ -61,7 +70,11 @@ def test_full_complaint_lifecycle(client):
             "lsgd_name": "Kochi Corporation",
         },
     }
-    create_res = client.post("/api/v1/complaints", json=create_payload, headers={"Authorization": f"Bearer {citizen_token}"})
+    create_res = client.post(
+        "/api/v1/complaints",
+        json=create_payload,
+        headers={"Authorization": f"Bearer {citizen_token}"},
+    )
     assert create_res.status_code == 201
     complaint_data = create_res.json()
     complaint_id = complaint_data["id"]
@@ -134,9 +147,14 @@ def test_full_complaint_lifecycle(client):
 
 def test_invalid_lifecycle_transition_fails(client):
     from tests.conftest import TestingSessionLocal
+
     with TestingSessionLocal() as session:
-        citizen_token, _ = create_user_with_role(client, session, "citizen.jump@example.com", "COMMUNITY", "സുരേഷ്")
-        authority_token, _ = create_user_with_role(client, session, "authority.jump@example.com", "AUTHORITY", "സെക്രട്ടറി")
+        citizen_token, _ = create_user_with_role(
+            client, session, "citizen.jump@example.com", "COMMUNITY", "സുരേഷ്"
+        )
+        authority_token, _ = create_user_with_role(
+            client, session, "authority.jump@example.com", "AUTHORITY", "സെക്രട്ടറി"
+        )
 
     # Create complaint (starts in SUBMITTED)
     create_res = client.post(
@@ -169,8 +187,11 @@ def test_invalid_lifecycle_transition_fails(client):
 
 def test_role_authorization_rejection(client):
     from tests.conftest import TestingSessionLocal
+
     with TestingSessionLocal() as session:
-        citizen_token, _ = create_user_with_role(client, session, "citizen.unauth@example.com", "COMMUNITY", "ബിന്ദു")
+        citizen_token, _ = create_user_with_role(
+            client, session, "citizen.unauth@example.com", "COMMUNITY", "ബിന്ദു"
+        )
 
     create_res = client.post(
         "/api/v1/complaints",
@@ -202,9 +223,14 @@ def test_role_authorization_rejection(client):
 
 def test_rejection_and_citizen_appeal(client):
     from tests.conftest import TestingSessionLocal
+
     with TestingSessionLocal() as session:
-        citizen_token, _ = create_user_with_role(client, session, "citizen.appeal@example.com", "COMMUNITY", "മനോജ്")
-        authority_token, _ = create_user_with_role(client, session, "authority.appeal@example.com", "AUTHORITY", "തഹസിൽദാർ")
+        citizen_token, _ = create_user_with_role(
+            client, session, "citizen.appeal@example.com", "COMMUNITY", "മനോജ്"
+        )
+        authority_token, _ = create_user_with_role(
+            client, session, "authority.appeal@example.com", "AUTHORITY", "തഹസിൽദാർ"
+        )
 
     create_res = client.post(
         "/api/v1/complaints",
@@ -236,7 +262,10 @@ def test_rejection_and_citizen_appeal(client):
     # 2. Citizen appeals rejected complaint
     appeal_res = client.post(
         f"/api/v1/complaints/{complaint_id}/status",
-        json={"new_status": "APPEALED", "remarks": "കോടതി ഉത്തരവ് ലംഘിച്ചാണ് പ്രവർത്തനം നടക്കുന്നത്. പുനഃപരിശോധിക്കണം."},
+        json={
+            "new_status": "APPEALED",
+            "remarks": "കോടതി ഉത്തരവ് ലംഘിച്ചാണ് പ്രവർത്തനം നടക്കുന്നത്. പുനഃപരിശോധിക്കണം.",
+        },
         headers={"Authorization": f"Bearer {citizen_token}"},
     )
     assert appeal_res.status_code == 200

@@ -1,11 +1,13 @@
-import pytest
 import uuid
+
+import pytest
 from fastapi.testclient import TestClient
-from tests.conftest import TestingSessionLocal
-from app.models.auth import User, Role, UserRole
-from app.models.location import Location
-from app.models.complaint import Complaint, Evidence
+
 from app.core.security import get_password_hash
+from app.models.auth import Role, User, UserRole
+from app.models.complaint import Complaint, Evidence
+from app.models.location import Location
+from tests.conftest import TestingSessionLocal
 
 
 @pytest.fixture(scope="module")
@@ -14,7 +16,9 @@ def map_seed_data():
     try:
         citizen_role = db.query(Role).filter_by(name="COMMUNITY").first()
         if not citizen_role:
-            citizen_role = Role(name="COMMUNITY", display_name_ml="പൊതുജനം", display_name_en="Citizen")
+            citizen_role = Role(
+                name="COMMUNITY", display_name_ml="പൊതുജനം", display_name_en="Citizen"
+            )
             db.add(citizen_role)
             db.commit()
 
@@ -110,7 +114,15 @@ def map_seed_data():
         db.add(ev1)
         db.commit()
 
-        return {"user": user, "c1": c1, "c2": c2, "c3": c3, "loc1": loc1, "loc2": loc2, "loc3": loc3}
+        return {
+            "user": user,
+            "c1": c1,
+            "c2": c2,
+            "c3": c3,
+            "loc1": loc1,
+            "loc2": loc2,
+            "loc3": loc3,
+        }
     finally:
         db.close()
 

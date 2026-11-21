@@ -1,11 +1,12 @@
 import uuid
-import pytest
+
 from fastapi.testclient import TestClient
-from tests.conftest import TestingSessionLocal
-from app.models.auth import User, Role, UserRole
-from app.models.location import Location
-from app.models.complaint import Complaint
+
 from app.core.security import get_password_hash
+from app.models.auth import Role, User, UserRole
+from app.models.complaint import Complaint
+from app.models.location import Location
+from tests.conftest import TestingSessionLocal
 
 
 def test_analytics_overview_empty_or_existing(client: TestClient):

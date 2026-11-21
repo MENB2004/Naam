@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, ConfigDict, Field
-from app.schemas.complaint import CATEGORY_ML_MAP, STATUS_ML_MAP
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict
 
 
 class MapPoint(BaseModel):
@@ -18,29 +18,29 @@ class MapPoint(BaseModel):
     longitude: float
     district: str
     lsgd_name: str
-    ward_number: Optional[str] = None
+    ward_number: str | None = None
     created_at: datetime
-    thumbnail_url: Optional[str] = None
-    distance_km: Optional[float] = None
+    thumbnail_url: str | None = None
+    distance_km: float | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class GeoJsonFeature(BaseModel):
     type: str = "Feature"
-    geometry: Dict[str, Any]
-    properties: Dict[str, Any]
+    geometry: dict[str, Any]
+    properties: dict[str, Any]
 
 
 class GeoJsonFeatureCollection(BaseModel):
     type: str = "FeatureCollection"
-    features: List[GeoJsonFeature]
+    features: list[GeoJsonFeature]
     total_count: int
 
 
 class MapClustersResponse(BaseModel):
     total_count: int
-    points: List[MapPoint]
+    points: list[MapPoint]
     geojson: GeoJsonFeatureCollection
 
 
@@ -63,5 +63,5 @@ class PublicMapSummary(BaseModel):
     active_complaints: int
     resolved_complaints: int
     active_departments: int
-    categories: List[PublicCategoryCount]
-    recent_reports: List[PublicRecentReport]
+    categories: list[PublicCategoryCount]
+    recent_reports: list[PublicRecentReport]

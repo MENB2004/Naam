@@ -1,23 +1,24 @@
 import uuid
-from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session, joinedload
-from app.core.database import get_db
+
 from app.api.deps import require_role
-from app.schemas.auth import UserProfile
-from app.models.auth import User, Role, UserRole, AuditLog
-from app.models.department import Department
-from app.models.complaint import Complaint
+from app.core.database import get_db
 from app.models.alert import Alert
+from app.models.auth import AuditLog, Role, User, UserRole
+from app.models.complaint import Complaint
+from app.models.department import Department
 from app.schemas.admin import (
+    AuditLogOut,
+    DepartmentAdminOut,
+    DepartmentCreate,
     SystemStats,
     UserAdminOut,
     UserRoleUpdate,
     UserStatusUpdate,
-    DepartmentCreate,
-    DepartmentAdminOut,
-    AuditLogOut,
 )
+from app.schemas.auth import UserProfile
 
 router = APIRouter(dependencies=[Depends(require_role(["SUPER_ADMIN"]))])
 
@@ -29,9 +30,9 @@ def record_audit(
     user_id: uuid.UUID,
     action: str,
     entity_name: str,
-    entity_id: Optional[uuid.UUID],
+    entity_id: uuid.UUID | None,
     details: dict,
-    ip_address: Optional[str] = None,
+    ip_address: str | None = None,
 ):
     log = AuditLog(
         id=uuid.uuid4(),
@@ -56,11 +57,7 @@ def get_system_stats(db: Session = Depends(get_db)):
         .filter(Complaint.current_status.notin_(["RESOLVED", "REJECTED"]))
         .count()
     )
-    resolved_complaints = (
-        db.query(Complaint)
-        .filter(Complaint.current_status == "RESOLVED")
-        .count()
-    )
+    resolved_complaints = db.query(Complaint).filter(Complaint.current_status == "RESOLVED").count()
     total_departments = db.query(Department).count()
     active_alerts = db.query(Alert).filter(Alert.is_active == True).count()
     total_audit_logs = db.query(AuditLog).count()
@@ -76,20 +73,17 @@ def get_system_stats(db: Session = Depends(get_db)):
     )
 
 
-@router.get("/users", response_model=List[UserAdminOut])
+@router.get("/users", response_model=list[UserAdminOut])
 def list_users(
-    search: Optional[str] = Query(None, description="Search by name, email, or phone"),
-    role: Optional[str] = Query(None, description="Filter by role"),
+    search: str | None = Query(None, description="Search by name, email, or phone"),
+    role: str | None = Query(None, description="Filter by role"),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
 ):
     """Retrieve all users with roles and department affiliations."""
-    query = (
-        db.query(User)
-        .options(
-            joinedload(User.roles).joinedload(UserRole.role),
-            joinedload(User.department),
-        )
+    query = db.query(User).options(
+        joinedload(User.roles).joinedload(UserRole.role),
+        joinedload(User.department),
     )
 
     if search:
@@ -152,7 +146,9 @@ def update_user_role(
     # Find target role
     new_role = db.query(Role).filter_by(name=payload.role).first()
     if not new_role:
-        new_role = Role(name=payload.role, display_name_ml=payload.role, display_name_en=payload.role)
+        new_role = Role(
+            name=payload.role, display_name_ml=payload.role, display_name_en=payload.role
+        )
         db.add(new_role)
         db.commit()
 
@@ -184,7 +180,11 @@ def update_user_role(
         ip_address=client_ip,
     )
 
-    dept = db.query(Department).filter(Department.id == target_user.department_id).first() if target_user.department_id else None
+    dept = (
+        db.query(Department).filter(Department.id == target_user.department_id).first()
+        if target_user.department_id
+        else None
+    )
 
     return UserAdminOut(
         id=target_user.id,
@@ -232,7 +232,9 @@ def update_user_status(
         ip_address=client_ip,
     )
 
-    primary_role = target_user.roles[0].role if target_user.roles and target_user.roles[0].role else None
+    primary_role = (
+        target_user.roles[0].role if target_user.roles and target_user.roles[0].role else None
+    )
     role_name = primary_role.name if primary_role else "COMMUNITY"
     role_ml = primary_role.display_name_ml if primary_role else "പൗരൻ"
 
@@ -251,7 +253,7 @@ def update_user_status(
     )
 
 
-@router.get("/departments", response_model=List[DepartmentAdminOut])
+@router.get("/departments", response_model=list[DepartmentAdminOut])
 def list_departments_admin(db: Session = Depends(get_db)):
     """List all departments with associated metrics."""
     departments = db.query(Department).order_by(Department.code).all()
@@ -329,9 +331,9 @@ def create_department_admin(
     )
 
 
-@router.get("/audit-logs", response_model=List[AuditLogOut])
+@router.get("/audit-logs", response_model=list[AuditLogOut])
 def get_audit_logs(
-    action: Optional[str] = Query(None, description="Filter by action name"),
+    action: str | None = Query(None, description="Filter by action name"),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
 ):

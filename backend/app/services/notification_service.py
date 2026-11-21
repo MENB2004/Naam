@@ -1,6 +1,7 @@
 import uuid
-from typing import Optional
+
 from sqlalchemy.orm import Session
+
 from app.models.alert import Notification
 from app.schemas.complaint import STATUS_ML_MAP
 
@@ -11,7 +12,7 @@ def send_notification(
     title: str,
     content: str,
     reference_type: str = "COMPLAINT",
-    reference_id: Optional[uuid.UUID] = None,
+    reference_id: uuid.UUID | None = None,
 ) -> Notification:
     """Create a persistent in-app notification for a user."""
     notif = Notification(
@@ -35,7 +36,7 @@ def notify_status_change(
     complaint_id: uuid.UUID,
     tracking_code: str,
     new_status: str,
-    remarks: Optional[str] = None,
+    remarks: str | None = None,
 ) -> Notification:
     """Notify the reporting citizen when their complaint status progresses."""
     status_ml = STATUS_ML_MAP.get(new_status, new_status)
@@ -60,7 +61,7 @@ def notify_officer_assignment(
     reporter_id: uuid.UUID,
     complaint_id: uuid.UUID,
     tracking_code: str,
-    instructions: Optional[str] = None,
+    instructions: str | None = None,
 ) -> None:
     """Notify the assigned field officer and the citizen."""
     # 1. Notify Officer

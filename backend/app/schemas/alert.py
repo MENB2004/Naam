@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -14,8 +14,8 @@ class AlertCreate(BaseModel):
         default="OFFICIAL_WARNING",
         description="'OFFICIAL_WARNING', 'COMMUNITY_REPORT', 'SIMULATED_DEMO_ALERT'",
     )
-    affected_district: Optional[str] = Field(None, max_length=100)
-    expires_at: Optional[datetime] = None
+    affected_district: str | None = Field(None, max_length=100)
+    expires_at: datetime | None = None
 
 
 class AlertOut(BaseModel):
@@ -26,11 +26,11 @@ class AlertOut(BaseModel):
     message_en: str
     alert_level: str
     alert_source: str
-    affected_district: Optional[str] = None
+    affected_district: str | None = None
     is_active: bool
     created_by: uuid.UUID
-    creator_name: Optional[str] = None
-    expires_at: Optional[datetime] = None
+    creator_name: str | None = None
+    expires_at: datetime | None = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -41,8 +41,8 @@ class NotificationOut(BaseModel):
     user_id: uuid.UUID
     title: str
     content: str
-    reference_type: Optional[str] = None
-    reference_id: Optional[uuid.UUID] = None
+    reference_type: str | None = None
+    reference_id: uuid.UUID | None = None
     is_read: bool
     created_at: datetime
 
@@ -55,4 +55,4 @@ class UnreadCountResponse(BaseModel):
 
 class NotificationListResponse(BaseModel):
     unread_count: int
-    notifications: List[NotificationOut]
+    notifications: list[NotificationOut]

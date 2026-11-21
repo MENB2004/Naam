@@ -1,29 +1,28 @@
 import secrets
 import uuid
-from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, desc
+from sqlalchemy import desc, select
 from sqlalchemy.orm import Session, selectinload
-from app.core.database import get_db
+
 from app.api.deps import get_current_user
-from app.models.auth import User, Role, UserRole
-from app.models.department import Department
-from app.models.complaint import Complaint, ComplaintUpdate, Evidence, ComplaintAssignment
+from app.core.database import get_db
+from app.models.auth import Role, User, UserRole
+from app.models.complaint import Complaint, ComplaintAssignment, ComplaintUpdate, Evidence
 from app.models.location import Location
 from app.schemas.complaint import (
+    CATEGORY_ML_MAP,
+    STATUS_ML_MAP,
+    AssignmentCreate,
     ComplaintCreate,
     ComplaintOut,
     ComplaintUpdateOut,
-    StatusUpdatePayload,
-    AssignmentCreate,
-    AssignmentOut,
-    ResolutionProofCreate,
     OfficerOut,
-    CATEGORY_ML_MAP,
-    STATUS_ML_MAP,
+    ResolutionProofCreate,
+    StatusUpdatePayload,
 )
 from app.services.complaint_state_machine import validate_status_transition
-from app.services.notification_service import notify_status_change, notify_officer_assignment
+from app.services.notification_service import notify_officer_assignment, notify_status_change
 
 router = APIRouter()
 
@@ -43,7 +42,9 @@ def generate_unique_tracking_code(db: Session) -> str:
     for _ in range(10):
         code_number = secrets.randbelow(90000) + 10000
         tracking_code = f"NAAM-2026-{code_number}"
-        exists = db.scalars(select(Complaint.id).where(Complaint.tracking_code == tracking_code)).first()
+        exists = db.scalars(
+            select(Complaint.id).where(Complaint.tracking_code == tracking_code)
+        ).first()
         if not exists:
             return tracking_code
     return f"NAAM-2026-{uuid.uuid4().hex[:6].upper()}"
@@ -97,7 +98,9 @@ def serialize_complaint(c: Complaint) -> ComplaintOut:
     )
 
 
-@router.post("", response_model=ComplaintOut, status_code=status.HTTP_201_CREATED, tags=["Complaints"])
+@router.post(
+    "", response_model=ComplaintOut, status_code=status.HTTP_201_CREATED, tags=["Complaints"]
+)
 def create_complaint(
     complaint_in: ComplaintCreate,
     db: Session = Depends(get_db),
@@ -109,6 +112,7 @@ def create_complaint(
     geom_val = None
     if db.bind and db.bind.dialect.name == "postgresql":
         from geoalchemy2.elements import WKTElement
+
         geom_val = WKTElement(f"POINT({loc_data.longitude} {loc_data.latitude})", srid=4326)
 
     location = Location(
@@ -184,7 +188,7 @@ def create_complaint(
     return serialize_complaint(loaded)
 
 
-@router.get("/me", response_model=List[ComplaintOut], tags=["Complaints"])
+@router.get("/me", response_model=list[ComplaintOut], tags=["Complaints"])
 def get_my_complaints(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -232,11 +236,11 @@ def track_complaint(
     return serialize_complaint(complaint)
 
 
-@router.get("", response_model=List[ComplaintOut], tags=["Complaints"])
+@router.get("", response_model=list[ComplaintOut], tags=["Complaints"])
 def list_public_complaints(
-    category: Optional[str] = None,
-    status_filter: Optional[str] = Query(None, alias="status"),
-    district: Optional[str] = None,
+    category: str | None = None,
+    status_filter: str | None = Query(None, alias="status"),
+    district: str | None = None,
     limit: int = 50,
     offset: int = 0,
     db: Session = Depends(get_db),
@@ -293,7 +297,9 @@ def get_complaint_by_id(
     return serialize_complaint(complaint)
 
 
-@router.get("/{complaint_id}/timeline", response_model=List[ComplaintUpdateOut], tags=["Complaints"])
+@router.get(
+    "/{complaint_id}/timeline", response_model=list[ComplaintUpdateOut], tags=["Complaints"]
+)
 def get_complaint_timeline(
     complaint_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -348,7 +354,9 @@ def update_complaint_status(
         )
 
     # 1. Enforce state machine rules & RBAC permissions
-    user_role_str = current_user.role.name if hasattr(current_user.role, "name") else str(current_user.role)
+    user_role_str = (
+        current_user.role.name if hasattr(current_user.role, "name") else str(current_user.role)
+    )
     is_owner = str(complaint.reporter_id) == str(current_user.id)
 
     validate_status_transition(
@@ -393,7 +401,7 @@ def update_complaint_status(
     return serialize_complaint(complaint)
 
 
-@router.get("/officers/available", response_model=List[OfficerOut], tags=["Authority & Officer"])
+@router.get("/officers/available", response_model=list[OfficerOut], tags=["Authority & Officer"])
 def list_available_officers(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -430,7 +438,9 @@ def assign_complaint_to_officer(
     """
     Department Authority assigns complaint to a Field Officer with deadline and instructions.
     """
-    user_role_str = current_user.role.name if hasattr(current_user.role, "name") else str(current_user.role)
+    user_role_str = (
+        current_user.role.name if hasattr(current_user.role, "name") else str(current_user.role)
+    )
     if user_role_str not in ["AUTHORITY", "SUPER_ADMIN"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -506,11 +516,13 @@ def assign_complaint_to_officer(
     )
 
     # Reload
-    reloaded = db.scalars(select(Complaint).options(*COMPLAINT_LOAD_OPTIONS).where(Complaint.id == complaint.id)).first()
+    reloaded = db.scalars(
+        select(Complaint).options(*COMPLAINT_LOAD_OPTIONS).where(Complaint.id == complaint.id)
+    ).first()
     return serialize_complaint(reloaded)
 
 
-@router.get("/officer/tasks", response_model=List[ComplaintOut], tags=["Authority & Officer"])
+@router.get("/officer/tasks", response_model=list[ComplaintOut], tags=["Authority & Officer"])
 def get_officer_tasks(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -540,7 +552,9 @@ def resolve_complaint_with_proof(
     """
     Field Officer or Authority resolves complaint and submits photographic proof.
     """
-    user_role_str = current_user.role.name if hasattr(current_user.role, "name") else str(current_user.role)
+    user_role_str = (
+        current_user.role.name if hasattr(current_user.role, "name") else str(current_user.role)
+    )
     if user_role_str not in ["OFFICER", "AUTHORITY", "SUPER_ADMIN"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -606,5 +620,7 @@ def resolve_complaint_with_proof(
         remarks=f"പരിഹാര തെളിവ് രേഖപ്പെടുത്തി: {payload.resolution_notes}",
     )
 
-    reloaded = db.scalars(select(Complaint).options(*COMPLAINT_LOAD_OPTIONS).where(Complaint.id == complaint.id)).first()
+    reloaded = db.scalars(
+        select(Complaint).options(*COMPLAINT_LOAD_OPTIONS).where(Complaint.id == complaint.id)
+    ).first()
     return serialize_complaint(reloaded)

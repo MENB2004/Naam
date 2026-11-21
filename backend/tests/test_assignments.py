@@ -1,17 +1,16 @@
-import uuid
-from datetime import datetime, timedelta, timezone
-import pytest
-from app.models.auth import User, Role, UserRole
+from datetime import UTC, datetime, timedelta
+
 from tests.test_lifecycle import create_user_with_role
 
 
 def test_authority_officer_assignment_and_resolution_flow(client):
     from tests.conftest import TestingSessionLocal
+
     with TestingSessionLocal() as session:
-        citizen_token, citizen_id = create_user_with_role(
+        citizen_token, _citizen_id = create_user_with_role(
             client, session, "citizen.assign@example.com", "COMMUNITY", "ഗിരിജ വത്സൻ"
         )
-        authority_token, authority_id = create_user_with_role(
+        authority_token, _authority_id = create_user_with_role(
             client, session, "authority.assign@example.com", "AUTHORITY", "മുനിസിപ്പൽ സെക്രട്ടറി"
         )
         officer_token, officer_id = create_user_with_role(
@@ -60,7 +59,7 @@ def test_authority_officer_assignment_and_resolution_flow(client):
     assert unauth_assign.status_code == 403
 
     # 4. Authority assigns complaint to Field Officer with deadline
-    deadline_iso = (datetime.now(timezone.utc) + timedelta(days=2)).isoformat()
+    deadline_iso = (datetime.now(UTC) + timedelta(days=2)).isoformat()
     assign_res = client.post(
         f"/api/v1/complaints/{complaint_id}/assign",
         json={

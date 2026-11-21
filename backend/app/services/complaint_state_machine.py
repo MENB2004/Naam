@@ -1,9 +1,9 @@
-from typing import Dict, List, Tuple
 from fastapi import HTTPException, status
+
 from app.schemas.complaint import STATUS_ML_MAP
 
 # State Machine Transition Rules
-VALID_TRANSITIONS: Dict[str, List[str]] = {
+VALID_TRANSITIONS: dict[str, list[str]] = {
     "SUBMITTED": ["VERIFIED", "ASSIGNED", "REJECTED"],
     "VERIFIED": ["ASSIGNED", "IN_PROGRESS", "REJECTED"],
     "ASSIGNED": ["IN_PROGRESS", "ACTION_TAKEN", "RESOLVED", "REJECTED"],
@@ -16,7 +16,7 @@ VALID_TRANSITIONS: Dict[str, List[str]] = {
 }
 
 # Role permissions per target state
-ROLE_PERMISSIONS: Dict[str, List[str]] = {
+ROLE_PERMISSIONS: dict[str, list[str]] = {
     "COMMUNITY": ["APPEALED", "REOPENED"],
     "OFFICER": ["IN_PROGRESS", "ACTION_TAKEN", "RESOLVED"],
     "AUTHORITY": ["VERIFIED", "ASSIGNED", "IN_PROGRESS", "ACTION_TAKEN", "RESOLVED", "REJECTED"],
@@ -69,9 +69,7 @@ def validate_status_transition(
         )
 
     # 3. Check role authorization
-    permitted_roles = [
-        r for r, targets in ROLE_PERMISSIONS.items() if target_upper in targets
-    ]
+    permitted_roles = [r for r, targets in ROLE_PERMISSIONS.items() if target_upper in targets]
     if role_upper not in permitted_roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

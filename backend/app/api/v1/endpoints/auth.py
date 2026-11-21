@@ -1,32 +1,39 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, status
+
 import jwt
-from sqlalchemy import select, or_
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
+
+from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.core.security import (
-    get_password_hash,
-    verify_password,
     create_access_token,
     create_refresh_token,
     decode_token,
+    get_password_hash,
+    verify_password,
 )
-from app.api.deps import get_current_user
-from app.models.auth import User, UserRole, Role
+from app.models.auth import Role, User, UserRole
 from app.models.department import Department
 from app.schemas.auth import (
-    UserRegister,
-    UserLogin,
-    TokenResponse,
-    UserProfile,
-    RefreshTokenRequest,
     LanguagePreferenceUpdate,
+    RefreshTokenRequest,
+    TokenResponse,
+    UserLogin,
+    UserProfile,
+    UserRegister,
 )
 
 router = APIRouter()
 
 
-@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED, tags=["Authentication"])
+@router.post(
+    "/register",
+    response_model=TokenResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["Authentication"],
+)
 def register(user_in: UserRegister, db: Session = Depends(get_db)):
     """Register a new citizen user in the Community portal."""
     # Check existing email
@@ -110,17 +117,18 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
         )
 
     # Resolve user role
-    role_stmt = select(Role).join(UserRole, Role.id == UserRole.role_id).where(UserRole.user_id == user.id)
+    role_stmt = (
+        select(Role).join(UserRole, Role.id == UserRole.role_id).where(UserRole.user_id == user.id)
+    )
     role = db.scalars(role_stmt).first()
     role_name = role.name if role else "COMMUNITY"
 
     # Optional role check for portal-specific entry (e.g. Authority logging in at /login/authority)
-    if login_in.expected_role and role_name != "SUPER_ADMIN":
-        if login_in.expected_role != role_name:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"ഈ പോർട്ടലിലേക്ക് പ്രവേശിക്കാൻ അനുമതിയില്ല. താങ്കളുടെ റോൾ: {role.display_name_ml if role else role_name}",
-            )
+    if login_in.expected_role and role_name != "SUPER_ADMIN" and login_in.expected_role != role_name:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"ഈ പോർട്ടലിലേക്ക് പ്രവേശിക്കാൻ അനുമതിയില്ല. താങ്കളുടെ റോൾ: {role.display_name_ml if role else role_name}",
+        )
 
     # Department info
     dept_name_ml = None
@@ -181,7 +189,9 @@ def refresh(refresh_in: RefreshTokenRequest, db: Session = Depends(get_db)):
     try:
         payload = decode_token(refresh_in.refresh_token)
         if payload.get("type") != "refresh":
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type"
+            )
         user_id_str = payload.get("sub")
         user_id = uuid.UUID(user_id_str)
     except (jwt.PyJWTError, ValueError):
@@ -192,9 +202,13 @@ def refresh(refresh_in: RefreshTokenRequest, db: Session = Depends(get_db)):
 
     user = db.scalars(select(User).where(User.id == user_id)).first()
     if not user or not user.is_active:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive"
+        )
 
-    role_stmt = select(Role).join(UserRole, Role.id == UserRole.role_id).where(UserRole.user_id == user.id)
+    role_stmt = (
+        select(Role).join(UserRole, Role.id == UserRole.role_id).where(UserRole.user_id == user.id)
+    )
     role = db.scalars(role_stmt).first()
     role_name = role.name if role else "COMMUNITY"
 

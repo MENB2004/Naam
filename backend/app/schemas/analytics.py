@@ -1,4 +1,3 @@
-from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -38,6 +37,6 @@ class TrendPoint(BaseModel):
 
 class AnalyticsSummaryResponse(BaseModel):
     overview: AnalyticsOverview
-    categories: List[CategoryDistribution]
-    districts: List[DistrictMetric]
-    trends: List[TrendPoint]
+    categories: list[CategoryDistribution]
+    districts: list[DistrictMetric]
+    trends: list[TrendPoint]

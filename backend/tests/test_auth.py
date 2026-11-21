@@ -1,5 +1,3 @@
-import pytest
-
 def test_register_citizen_success(client):
     payload = {
         "full_name": "Anjali Nair",
@@ -64,10 +62,13 @@ def test_role_mismatch_portal_block(client):
 
 def test_get_current_user_me(client):
     # First login to get token
-    login_resp = client.post("/api/v1/auth/login", json={
-        "identifier": "anjali.nair@example.com",
-        "password": "StrongPassword123!",
-    })
+    login_resp = client.post(
+        "/api/v1/auth/login",
+        json={
+            "identifier": "anjali.nair@example.com",
+            "password": "StrongPassword123!",
+        },
+    )
     token = login_resp.json()["access_token"]
 
     # Call /me with valid Bearer token
@@ -79,10 +80,13 @@ def test_get_current_user_me(client):
 
 
 def test_refresh_token_rotation(client):
-    login_resp = client.post("/api/v1/auth/login", json={
-        "identifier": "anjali.nair@example.com",
-        "password": "StrongPassword123!",
-    })
+    login_resp = client.post(
+        "/api/v1/auth/login",
+        json={
+            "identifier": "anjali.nair@example.com",
+            "password": "StrongPassword123!",
+        },
+    )
     refresh_token = login_resp.json()["refresh_token"]
 
     refresh_resp = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})

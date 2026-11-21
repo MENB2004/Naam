@@ -1,13 +1,14 @@
 import uuid
-from typing import List
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
 import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+
 from app.core.database import get_db
 from app.core.security import decode_token
-from app.models.auth import User, UserRole, Role
+from app.models.auth import Role, User, UserRole
 from app.models.department import Department
 from app.schemas.auth import UserProfile
 
@@ -47,7 +48,9 @@ def get_current_user(
         )
 
     # Get user role
-    role_stmt = select(Role).join(UserRole, Role.id == UserRole.role_id).where(UserRole.user_id == user.id)
+    role_stmt = (
+        select(Role).join(UserRole, Role.id == UserRole.role_id).where(UserRole.user_id == user.id)
+    )
     role = db.scalars(role_stmt).first()
     role_name = role.name if role else "COMMUNITY"
     role_ml = role.display_name_ml if role else "പൗരൻ"
@@ -78,7 +81,7 @@ def get_current_user(
     )
 
 
-def require_role(allowed_roles: List[str]):
+def require_role(allowed_roles: list[str]):
     def role_checker(current_user: UserProfile = Depends(get_current_user)) -> UserProfile:
         if current_user.role not in allowed_roles and current_user.role != "SUPER_ADMIN":
             raise HTTPException(
@@ -86,4 +89,5 @@ def require_role(allowed_roles: List[str]):
                 detail=f"ഈ നടപടിക്ക് അനുമതിയില്ല. ആവശ്യമായ അധികാരം: {', '.join(allowed_roles)} (Insufficient permissions)",
             )
         return current_user
+
     return role_checker

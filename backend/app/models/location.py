@@ -1,8 +1,10 @@
 import uuid
-from sqlalchemy import Column, Float, String, Text, DateTime, func
+
+from geoalchemy2 import Geometry
+from sqlalchemy import Column, DateTime, Float, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from geoalchemy2 import Geometry
+
 from app.core.database import Base
 
 
@@ -19,9 +21,13 @@ class Location(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
-    geom = Column(SafeGeometry(geometry_type="POINT", srid=4326, spatial_index=False), nullable=True)
+    geom = Column(
+        SafeGeometry(geometry_type="POINT", srid=4326, spatial_index=False), nullable=True
+    )
     district = Column(String(100), nullable=False, index=True)
-    lsgd_type = Column(String(50), nullable=False)  # 'GRAMA_PANCHAYAT', 'MUNICIPALITY', 'CORPORATION'
+    lsgd_type = Column(
+        String(50), nullable=False
+    )  # 'GRAMA_PANCHAYAT', 'MUNICIPALITY', 'CORPORATION'
     lsgd_name = Column(String(150), nullable=False)
     ward_number = Column(String(10), nullable=True)
     landmark = Column(Text, nullable=True)

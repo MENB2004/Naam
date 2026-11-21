@@ -1,11 +1,12 @@
 import uuid
-import pytest
+
 from sqlalchemy import select
-from tests.conftest import TestingSessionLocal
-from app.models.auth import Role, User
+
+from app.models.auth import User
+from app.models.complaint import Complaint
 from app.models.department import Department
 from app.models.location import Location
-from app.models.complaint import Complaint
+from tests.conftest import TestingSessionLocal
 
 
 def test_seed_and_query_departments(client):
@@ -15,14 +16,14 @@ def test_seed_and_query_departments(client):
             code="LSGD_TEST",
             name_ml="തദ്ദേശ സ്വയംഭരണ വകുപ്പ്",
             name_en="Local Self-Government Department",
-            contact_email="lsgd@kerala.gov.in"
+            contact_email="lsgd@kerala.gov.in",
         )
         kspcb = Department(
             id=uuid.uuid4(),
             code="KSPCB_TEST",
             name_ml="കേരള സംസ്ഥാന മലിനീകരണ നിയന്ത്രണ ബോർഡ്",
             name_en="Kerala State Pollution Control Board",
-            contact_email="kspcb@kerala.gov.in"
+            contact_email="kspcb@kerala.gov.in",
         )
         session.add_all([lsgd, kspcb])
         session.commit()
@@ -46,7 +47,7 @@ def test_create_location_and_complaint(client):
             id=uuid.uuid4(),
             full_name="Rajesh Kumar",
             email="rajesh.kumar@example.com",
-            password_hash="test_argon2_hash"
+            password_hash="test_argon2_hash",
         )
         session.add(reporter)
         session.flush()
@@ -59,7 +60,7 @@ def test_create_location_and_complaint(client):
             lsgd_type="MUNICIPALITY",
             lsgd_name="Kochi Corporation",
             ward_number="42",
-            landmark="Near Vyttila Mobility Hub"
+            landmark="Near Vyttila Mobility Hub",
         )
         session.add(loc)
         session.flush()
@@ -73,7 +74,7 @@ def test_create_location_and_complaint(client):
             severity="HIGH",
             current_status="SUBMITTED",
             reporter_id=reporter.id,
-            location_id=loc.id
+            location_id=loc.id,
         )
         session.add(comp)
         session.commit()

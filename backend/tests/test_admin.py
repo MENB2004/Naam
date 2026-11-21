@@ -1,9 +1,10 @@
 import uuid
-import pytest
+
 from fastapi.testclient import TestClient
-from tests.conftest import TestingSessionLocal
-from app.models.auth import User, Role, UserRole, AuditLog
+
 from app.core.security import get_password_hash
+from app.models.auth import Role, User, UserRole
+from tests.conftest import TestingSessionLocal
 
 
 def get_token(client: TestClient, email: str, role_name: str, full_name: str = "Admin User") -> str:
@@ -62,7 +63,7 @@ def test_super_admin_stats(client: TestClient):
 
 def test_super_admin_list_and_manage_users(client: TestClient):
     admin_token = get_token(client, "super_admin_users@example.com", "SUPER_ADMIN", "Chief Admin")
-    citizen_token = get_token(client, "target_citizen_user@example.com", "COMMUNITY", "Target User")
+    get_token(client, "target_citizen_user@example.com", "COMMUNITY", "Target User")
 
     # 1. List users
     res = client.get("/api/v1/admin/users", headers={"Authorization": f"Bearer {admin_token}"})
@@ -121,7 +122,9 @@ def test_super_admin_department_creation_and_listing(client: TestClient):
     assert create_res.json()["code"] == dept_code
 
     # List departments
-    list_res = client.get("/api/v1/admin/departments", headers={"Authorization": f"Bearer {admin_token}"})
+    list_res = client.get(
+        "/api/v1/admin/departments", headers={"Authorization": f"Bearer {admin_token}"}
+    )
     assert list_res.status_code == 200
     depts = list_res.json()
     assert any(d["code"] == dept_code for d in depts)

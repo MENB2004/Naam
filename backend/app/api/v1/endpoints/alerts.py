@@ -1,14 +1,15 @@
 import uuid
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
+
+from app.api.deps import require_role
 from app.core.database import get_db
-from app.api.deps import get_current_user, require_role
 from app.models.alert import Alert, Notification
 from app.models.auth import User
-from app.schemas.auth import UserProfile
 from app.schemas.alert import AlertCreate, AlertOut
+from app.schemas.auth import UserProfile
 
 router = APIRouter()
 
@@ -16,9 +17,9 @@ VALID_ALERT_SOURCES = ["OFFICIAL_WARNING", "COMMUNITY_REPORT", "SIMULATED_DEMO_A
 VALID_ALERT_LEVELS = ["INFO", "WARNING", "CRITICAL"]
 
 
-@router.get("", response_model=List[AlertOut])
+@router.get("", response_model=list[AlertOut])
 def get_active_alerts(
-    district: Optional[str] = Query(None, description="Filter by affected district"),
+    district: str | None = Query(None, description="Filter by affected district"),
     include_all: bool = Query(False, description="Include inactive/expired alerts if true"),
     db: Session = Depends(get_db),
 ):
@@ -26,7 +27,7 @@ def get_active_alerts(
     Public endpoint: Returns active environmental hazard alerts and broadcasts.
     Sorted by severity (CRITICAL first) and creation date.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     query = db.query(Alert).options(joinedload(Alert.creator))
 
     if not include_all:
@@ -34,7 +35,11 @@ def get_active_alerts(
         query = query.filter((Alert.expires_at == None) | (Alert.expires_at > now))
 
     if district and district != "ALL":
-        query = query.filter((Alert.affected_district == district) | (Alert.affected_district == None) | (Alert.affected_district == "ALL"))
+        query = query.filter(
+            (Alert.affected_district == district)
+            | (Alert.affected_district == None)
+            | (Alert.affected_district == "ALL")
+        )
 
     # Custom ordering: CRITICAL > WARNING > INFO
     alerts = query.order_by(

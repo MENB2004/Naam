@@ -1,13 +1,10 @@
 import uuid
-import pytest
+
 from fastapi.testclient import TestClient
-from tests.conftest import TestingSessionLocal
-from app.models.auth import User, Role, UserRole
-from app.models.department import Department
-from app.models.location import Location
-from app.models.complaint import Complaint
-from app.models.alert import Alert, Notification
+
 from app.core.security import get_password_hash
+from app.models.auth import Role, User, UserRole
+from tests.conftest import TestingSessionLocal
 
 
 def get_token(client: TestClient, email: str, role_name: str, full_name: str = "Test User") -> str:
@@ -66,8 +63,12 @@ def test_citizen_cannot_broadcast_alert(client: TestClient):
 
 
 def test_authority_broadcast_alert_and_user_receives_notification(client: TestClient):
-    auth_token = get_token(client, "authority_broadcaster@example.com", "AUTHORITY", "District Collector")
-    citizen_token = get_token(client, "citizen_listener@example.com", "COMMUNITY", "Citizen Listener")
+    auth_token = get_token(
+        client, "authority_broadcaster@example.com", "AUTHORITY", "District Collector"
+    )
+    citizen_token = get_token(
+        client, "citizen_listener@example.com", "COMMUNITY", "Citizen Listener"
+    )
 
     payload = {
         "title_ml": "പെരിയാർ തീരത്ത് കനത്ത ജാഗ്രതാ നിർദ്ദേശം",
@@ -105,7 +106,10 @@ def test_authority_broadcast_alert_and_user_receives_notification(client: TestCl
     assert notif_res.status_code == 200
     data = notif_res.json()
     assert data["unread_count"] >= 1
-    assert any(n["reference_type"] == "ALERT" and n["reference_id"] == alert_id for n in data["notifications"])
+    assert any(
+        n["reference_type"] == "ALERT" and n["reference_id"] == alert_id
+        for n in data["notifications"]
+    )
 
     # Citizen marks notification as read
     first_notif = next(n for n in data["notifications"] if n["reference_id"] == alert_id)
@@ -146,7 +150,9 @@ def test_invalid_alert_source_rejected(client: TestClient):
 
 def test_complaint_status_change_dispatches_notification(client: TestClient):
     # 1. Citizen registers and submits complaint
-    citizen_token = get_token(client, "notif_citizen@example.com", "COMMUNITY", "Complaining Citizen")
+    citizen_token = get_token(
+        client, "notif_citizen@example.com", "COMMUNITY", "Complaining Citizen"
+    )
     complaint_payload = {
         "title": "കനത്ത പ്ലാസ്റ്റിക് മാലിന്യ നിക്ഷേപം",
         "description": "തോപ്പുംപടി പാലത്തിന് താഴെ",

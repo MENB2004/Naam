@@ -1,6 +1,3 @@
-import pytest
-
-
 def get_auth_token(client, email="citizen.test@example.com"):
     # Generate unique phone suffix
     suffix = str(abs(hash(email)))[:8]

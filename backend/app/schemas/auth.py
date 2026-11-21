@@ -1,33 +1,33 @@
-from typing import List, Optional
 from uuid import UUID
-from pydantic import BaseModel, EmailStr, ConfigDict, Field
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserRegister(BaseModel):
     full_name: str
     email: EmailStr
-    phone: Optional[str] = None
+    phone: str | None = None
     password: str
-    preferred_language: Optional[str] = "ml"
+    preferred_language: str | None = "ml"
 
 
 class UserLogin(BaseModel):
     identifier: str  # Email or phone number
     password: str
-    expected_role: Optional[str] = None  # Optional check for role-specific portal login
+    expected_role: str | None = None  # Optional check for role-specific portal login
 
 
 class UserProfile(BaseModel):
     id: UUID
     full_name: str
     email: EmailStr
-    phone: Optional[str] = None
+    phone: str | None = None
     role: str
     role_display_ml: str
     role_display_en: str
-    department_id: Optional[UUID] = None
-    department_name_ml: Optional[str] = None
-    department_name_en: Optional[str] = None
+    department_id: UUID | None = None
+    department_name_ml: str | None = None
+    department_name_en: str | None = None
     is_active: bool
     preferred_language: str = "ml"
 

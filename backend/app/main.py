@@ -1,8 +1,10 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
 from app.core.config import settings
 
 
@@ -32,6 +34,14 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+# Security and Rate Limiting
+from app.core.limiter import RateLimitExceeded, custom_rate_limit_exceeded_handler, limiter
+from app.middleware.security_headers import SecurityHeadersMiddleware
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, custom_rate_limit_exceeded_handler)
+app.add_middleware(SecurityHeadersMiddleware)
 
 COMMON_BILINGUAL_ERRORS = {
     404: {
@@ -67,7 +77,9 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
     return JSONResponse(status_code=exc.status_code, content=content, headers=exc.headers)
 
+
 from app.api.v1.api import api_router
+
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
@@ -78,13 +90,10 @@ async def health_check():
         "service": "NAAM Central API",
         "service_ml": "നാം കേന്ദ്രീകൃത പ്ലാറ്റ്‌ഫോം",
         "version": settings.PROJECT_VERSION,
-        "environment": "development"
+        "environment": "development",
     }
 
 
 @app.get(f"{settings.API_V1_STR}/health", tags=["Health"])
 async def v1_health_check():
-    return {
-        "status": "ok",
-        "api_version": "v1"
-    }
+    return {"status": "ok", "api_version": "v1"}

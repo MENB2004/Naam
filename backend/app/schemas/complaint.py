@@ -1,7 +1,27 @@
+import html
+import re
 import uuid
 from datetime import datetime
-from typing import List, Optional
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+def sanitize_input_text(val: str) -> str:
+    """Sanitize freeform text against XSS and script injection attacks."""
+    if not val:
+        return val
+    # Strip executable script, iframe, and embedded objects
+    cleaned = re.sub(
+        r"<\s*script[^>]*>.*?<\s*/\s*script\s*>", "", val, flags=re.DOTALL | re.IGNORECASE
+    )
+    cleaned = re.sub(
+        r"<\s*(iframe|object|embed|applet)[^>]*>.*?<\s*/\s*\1\s*>",
+        "",
+        cleaned,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+    return html.escape(cleaned.strip())
+
 
 # Kerala Geographic Coordinate Bounds
 KERALA_MIN_LAT = 8.0
@@ -38,8 +58,8 @@ class LocationCreate(BaseModel):
     district: str = Field(..., max_length=100)
     lsgd_type: str = Field(default="GRAMA_PANCHAYAT", max_length=50)
     lsgd_name: str = Field(..., max_length=150)
-    ward_number: Optional[str] = Field(None, max_length=10)
-    landmark: Optional[str] = None
+    ward_number: str | None = Field(None, max_length=10)
+    landmark: str | None = None
 
     @field_validator("latitude")
     @classmethod
@@ -63,8 +83,8 @@ class LocationOut(BaseModel):
     district: str
     lsgd_type: str
     lsgd_name: str
-    ward_number: Optional[str] = None
-    landmark: Optional[str] = None
+    ward_number: str | None = None
+    landmark: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -91,9 +111,9 @@ class ComplaintUpdateOut(BaseModel):
     id: uuid.UUID
     previous_status: str
     new_status: str
-    remarks: Optional[str] = None
+    remarks: str | None = None
     created_at: datetime
-    author_name: Optional[str] = None
+    author_name: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -104,31 +124,51 @@ class ComplaintCreate(BaseModel):
     category: str = Field(default="WASTE")
     severity: str = Field(default="MEDIUM")
     location: LocationCreate
-    evidence: Optional[List[EvidenceCreate]] = []
+    evidence: list[EvidenceCreate] | None = []
+
+    @field_validator("title")
+    @classmethod
+    def validate_and_sanitize_title(cls, v: str) -> str:
+        sanitized = sanitize_input_text(v)
+        if len(sanitized) < 5:
+            raise ValueError(
+                "ശീർഷകത്തിൽ കുറഞ്ഞത് 5 അക്ഷരങ്ങൾ ഉണ്ടായിരിക്കണം (Title must have at least 5 characters)"
+            )
+        return sanitized
+
+    @field_validator("description")
+    @classmethod
+    def validate_and_sanitize_description(cls, v: str) -> str:
+        sanitized = sanitize_input_text(v)
+        if len(sanitized) < 10:
+            raise ValueError(
+                "വിവരണത്തിൽ കുറഞ്ഞത് 10 അക്ഷരങ്ങൾ ഉണ്ടായിരിക്കണം (Description must have at least 10 characters)"
+            )
+        return sanitized
 
 
 class StatusUpdatePayload(BaseModel):
     new_status: str = Field(..., description="Target lifecycle state")
     remarks: str = Field(..., min_length=2, max_length=1000, description="Audit log explanation")
-    assigned_to_id: Optional[uuid.UUID] = None
-    department_id: Optional[uuid.UUID] = None
+    assigned_to_id: uuid.UUID | None = None
+    department_id: uuid.UUID | None = None
 
 
 class AssignmentCreate(BaseModel):
     assigned_to_id: uuid.UUID
-    deadline: Optional[datetime] = None
-    instructions: Optional[str] = None
+    deadline: datetime | None = None
+    instructions: str | None = None
 
 
 class AssignmentOut(BaseModel):
     id: uuid.UUID
     complaint_id: uuid.UUID
     assigned_by_id: uuid.UUID
-    assigned_by_name: Optional[str] = None
+    assigned_by_name: str | None = None
     assigned_to_id: uuid.UUID
-    assigned_to_name: Optional[str] = None
-    instructions: Optional[str] = None
-    deadline: Optional[datetime] = None
+    assigned_to_name: str | None = None
+    instructions: str | None = None
+    deadline: datetime | None = None
     status: str
     created_at: datetime
 
@@ -137,16 +177,18 @@ class AssignmentOut(BaseModel):
 
 class ResolutionProofCreate(BaseModel):
     resolution_notes: str = Field(..., min_length=5, description="Field inspection outcome notes")
-    evidence_photos: List[EvidenceCreate] = Field(..., min_length=1, description="After-resolution photos")
+    evidence_photos: list[EvidenceCreate] = Field(
+        ..., min_length=1, description="After-resolution photos"
+    )
 
 
 class OfficerOut(BaseModel):
     id: uuid.UUID
     full_name: str
     email: str
-    phone: Optional[str] = None
+    phone: str | None = None
     role: str = "OFFICER"
-    department_name_ml: Optional[str] = None
+    department_name_ml: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -162,14 +204,14 @@ class ComplaintOut(BaseModel):
     current_status: str
     status_display_ml: str
     reporter_id: uuid.UUID
-    reporter_name: Optional[str] = None
-    department_id: Optional[uuid.UUID] = None
-    department_name_ml: Optional[str] = None
+    reporter_name: str | None = None
+    department_id: uuid.UUID | None = None
+    department_name_ml: str | None = None
     created_at: datetime
     updated_at: datetime
     location: LocationOut
-    evidence: List[EvidenceOut] = []
-    updates: List[ComplaintUpdateOut] = []
-    assignments: List[AssignmentOut] = []
+    evidence: list[EvidenceOut] = []
+    updates: list[ComplaintUpdateOut] = []
+    assignments: list[AssignmentOut] = []
 
     model_config = ConfigDict(from_attributes=True)

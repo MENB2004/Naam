@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -18,11 +19,11 @@ class UserAdminOut(BaseModel):
     id: uuid.UUID
     full_name: str
     email: str
-    phone: Optional[str] = None
+    phone: str | None = None
     role: str
     role_display_ml: str
-    department_id: Optional[uuid.UUID] = None
-    department_name_ml: Optional[str] = None
+    department_id: uuid.UUID | None = None
+    department_name_ml: str | None = None
     is_active: bool
     is_verified: bool
     created_at: datetime
@@ -32,7 +33,7 @@ class UserAdminOut(BaseModel):
 
 class UserRoleUpdate(BaseModel):
     role: str = Field(..., description="'COMMUNITY', 'AUTHORITY', 'OFFICER', 'SUPER_ADMIN'")
-    department_id: Optional[uuid.UUID] = None
+    department_id: uuid.UUID | None = None
 
 
 class UserStatusUpdate(BaseModel):
@@ -43,8 +44,8 @@ class DepartmentCreate(BaseModel):
     code: str = Field(..., max_length=50)
     name_ml: str = Field(..., max_length=150)
     name_en: str = Field(..., max_length=150)
-    contact_email: Optional[str] = None
-    contact_phone: Optional[str] = None
+    contact_email: str | None = None
+    contact_phone: str | None = None
 
 
 class DepartmentAdminOut(BaseModel):
@@ -52,8 +53,8 @@ class DepartmentAdminOut(BaseModel):
     code: str
     name_ml: str
     name_en: str
-    contact_email: Optional[str] = None
-    contact_phone: Optional[str] = None
+    contact_email: str | None = None
+    contact_phone: str | None = None
     is_active: bool = True
     user_count: int = 0
     complaint_count: int = 0
@@ -64,14 +65,14 @@ class DepartmentAdminOut(BaseModel):
 
 class AuditLogOut(BaseModel):
     id: uuid.UUID
-    user_id: Optional[uuid.UUID] = None
-    user_email: Optional[str] = None
-    user_name: Optional[str] = None
+    user_id: uuid.UUID | None = None
+    user_email: str | None = None
+    user_name: str | None = None
     action: str
-    entity_name: Optional[str] = None
-    entity_id: Optional[uuid.UUID] = None
-    ip_address: Optional[str] = None
-    details: Optional[Dict[str, Any]] = None
+    entity_name: str | None = None
+    entity_id: uuid.UUID | None = None
+    ip_address: str | None = None
+    details: dict[str, Any] | None = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
