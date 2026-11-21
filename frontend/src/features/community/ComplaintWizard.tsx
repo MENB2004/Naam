@@ -180,6 +180,21 @@ export const ComplaintWizard: React.FC = () => {
   };
 
   const handleSubmitComplaint = async () => {
+    const cleanTitle = title.trim();
+    const cleanDescription = description.trim();
+    if (cleanTitle.length < 5 || cleanTitle.length > 255) {
+      setSubmissionError('തലക്കെട്ട് 5 മുതൽ 255 വരെ അക്ഷരങ്ങളായിരിക്കണം (Title must be 5–255 characters).');
+      return;
+    }
+    if (cleanDescription.length < 10) {
+      setSubmissionError('വിവരണം കുറഞ്ഞത് 10 അക്ഷരങ്ങളെങ്കിലും വേണം (Description must be at least 10 characters).');
+      return;
+    }
+    if (latitude < 8 || latitude > 13 || longitude < 74.5 || longitude > 77.8) {
+      setSubmissionError('കേരളത്തിനകത്തുള്ള സ്ഥലം തിരഞ്ഞെടുക്കുക (Select a location within Kerala).');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmissionError(null);
 
@@ -202,8 +217,8 @@ export const ComplaintWizard: React.FC = () => {
 
     try {
       const res = await complaintService.createComplaint({
-        title: title.trim(),
-        description: description.trim(),
+        title: cleanTitle,
+        description: cleanDescription,
         category,
         severity,
         location: locationData,
@@ -346,10 +361,13 @@ export const ComplaintWizard: React.FC = () => {
                 <Input
                   type="text"
                   required
+                  minLength={5}
+                  maxLength={255}
                   placeholder="ഉദാ: മറൈൻ ഡ്രൈവിൽ പ്ലാസ്റ്റിക് മാലിന്യ നിക്ഷേപം"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
+                <p className="mt-1 text-[11px] text-slate-500">5 മുതൽ 255 വരെ അക്ഷരങ്ങൾ (5–255 characters)</p>
               </div>
 
               <div>
@@ -359,11 +377,13 @@ export const ComplaintWizard: React.FC = () => {
                 <textarea
                   rows={4}
                   required
+                  minLength={10}
                   placeholder="പ്രശ്നത്തിന്റെ സ്വഭാവം, ദുർഗന്ധം, എത്ര നാളായി നിലനിൽക്കുന്നു, ബാധിക്കുന്ന ജനസംഖ്യ എന്നിവ വിശദമാക്കുക..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#087C63]"
                 />
+                <p className="mt-1 text-[11px] text-slate-500">കുറഞ്ഞത് 10 അക്ഷരങ്ങൾ (At least 10 characters)</p>
               </div>
 
               <div>
@@ -494,7 +514,7 @@ export const ComplaintWizard: React.FC = () => {
               <Button
                 type="button"
                 variant="primary"
-                disabled={!title.trim() || !description.trim()}
+                disabled={title.trim().length < 5 || title.trim().length > 255 || description.trim().length < 10}
                 onClick={() => setStep(3)}
               >
                 തുടരുക (Next)

@@ -48,6 +48,19 @@ export interface ComplaintUpdate {
   author_name?: string | null;
 }
 
+export interface ComplaintAssignment {
+  id: string;
+  complaint_id: string;
+  assigned_by_id: string;
+  assigned_by_name?: string | null;
+  assigned_to_id: string;
+  assigned_to_name?: string | null;
+  instructions?: string | null;
+  deadline?: string | null;
+  status: string;
+  created_at: string;
+}
+
 export interface Complaint {
   id: string;
   tracking_code: string;
@@ -67,6 +80,7 @@ export interface Complaint {
   location: LocationData;
   evidence: EvidenceItem[];
   updates: ComplaintUpdate[];
+  assignments?: ComplaintAssignment[];
 }
 
 export interface ComplaintCreatePayload {

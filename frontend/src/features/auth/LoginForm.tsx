@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   Lock,
   Mail,
@@ -106,6 +106,7 @@ interface LoginFormProps {
 
 export const LoginForm: React.FC<LoginFormProps> = ({ portal }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const config = PORTAL_CONFIGS[portal];
   const { setAuth } = useAuthStore();
 
@@ -132,7 +133,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ portal }) => {
       });
 
       setAuth(data.user, data.accessToken, data.refreshToken);
-      navigate(config.redirectUrl);
+      const routeState = location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null;
+      const intendedPath = routeState?.from?.pathname;
+      const destination = intendedPath?.startsWith('/') && !intendedPath.startsWith('//')
+        ? `${intendedPath}${routeState?.from?.search ?? ''}${routeState?.from?.hash ?? ''}`
+        : config.redirectUrl;
+      navigate(destination, { replace: true });
     } catch (err: any) {
       setErrorMessage(err.message || 'ലോഗിൻ പരാജയപ്പെട്ടു. വിവരങ്ങൾ ശരിയാണോ എന്ന് പരിശോധിക്കുക.');
     } finally {

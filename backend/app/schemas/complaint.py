@@ -113,6 +113,43 @@ class StatusUpdatePayload(BaseModel):
     department_id: Optional[uuid.UUID] = None
 
 
+class AssignmentCreate(BaseModel):
+    assigned_to_id: uuid.UUID
+    deadline: Optional[datetime] = None
+    instructions: Optional[str] = None
+
+
+class AssignmentOut(BaseModel):
+    id: uuid.UUID
+    complaint_id: uuid.UUID
+    assigned_by_id: uuid.UUID
+    assigned_by_name: Optional[str] = None
+    assigned_to_id: uuid.UUID
+    assigned_to_name: Optional[str] = None
+    instructions: Optional[str] = None
+    deadline: Optional[datetime] = None
+    status: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ResolutionProofCreate(BaseModel):
+    resolution_notes: str = Field(..., min_length=5, description="Field inspection outcome notes")
+    evidence_photos: List[EvidenceCreate] = Field(..., min_length=1, description="After-resolution photos")
+
+
+class OfficerOut(BaseModel):
+    id: uuid.UUID
+    full_name: str
+    email: str
+    phone: Optional[str] = None
+    role: str = "OFFICER"
+    department_name_ml: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ComplaintOut(BaseModel):
     id: uuid.UUID
     tracking_code: str
@@ -132,5 +169,6 @@ class ComplaintOut(BaseModel):
     location: LocationOut
     evidence: List[EvidenceOut] = []
     updates: List[ComplaintUpdateOut] = []
+    assignments: List[AssignmentOut] = []
 
     model_config = ConfigDict(from_attributes=True)

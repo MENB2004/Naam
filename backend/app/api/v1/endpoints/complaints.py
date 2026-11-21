@@ -6,20 +6,35 @@ from sqlalchemy import select, desc
 from sqlalchemy.orm import Session, selectinload
 from app.core.database import get_db
 from app.api.deps import get_current_user
-from app.models.auth import User
-from app.models.complaint import Complaint, ComplaintUpdate, Evidence
+from app.models.auth import User, Role, UserRole
+from app.models.department import Department
+from app.models.complaint import Complaint, ComplaintUpdate, Evidence, ComplaintAssignment
 from app.models.location import Location
 from app.schemas.complaint import (
     ComplaintCreate,
     ComplaintOut,
     ComplaintUpdateOut,
     StatusUpdatePayload,
+    AssignmentCreate,
+    AssignmentOut,
+    ResolutionProofCreate,
+    OfficerOut,
     CATEGORY_ML_MAP,
     STATUS_ML_MAP,
 )
 from app.services.complaint_state_machine import validate_status_transition
 
 router = APIRouter()
+
+COMPLAINT_LOAD_OPTIONS = [
+    selectinload(Complaint.reporter),
+    selectinload(Complaint.department),
+    selectinload(Complaint.location),
+    selectinload(Complaint.evidence),
+    selectinload(Complaint.updates).selectinload(ComplaintUpdate.author),
+    selectinload(Complaint.assignments).selectinload(ComplaintAssignment.assignee),
+    selectinload(Complaint.assignments).selectinload(ComplaintAssignment.assigner),
+]
 
 
 def generate_unique_tracking_code(db: Session) -> str:
@@ -62,6 +77,21 @@ def serialize_complaint(c: Complaint) -> ComplaintOut:
                 "author_name": u.author.full_name if u.author else "സിസ്റ്റം",
             }
             for u in (c.updates or [])
+        ],
+        assignments=[
+            {
+                "id": a.id,
+                "complaint_id": a.complaint_id,
+                "assigned_by_id": a.assigned_by,
+                "assigned_by_name": a.assigner.full_name if a.assigner else None,
+                "assigned_to_id": a.assigned_to,
+                "assigned_to_name": a.assignee.full_name if a.assignee else None,
+                "instructions": a.instructions,
+                "deadline": a.deadline,
+                "status": a.status,
+                "created_at": a.created_at,
+            }
+            for a in (c.assignments or [])
         ],
     )
 
@@ -350,3 +380,200 @@ def update_complaint_status(
     # Reload complaint
     db.refresh(complaint)
     return serialize_complaint(complaint)
+
+
+@router.get("/officers/available", response_model=List[OfficerOut], tags=["Authority & Officer"])
+def list_available_officers(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """List all Field Officers available for complaint assignment."""
+    stmt = (
+        select(User)
+        .join(UserRole, User.id == UserRole.user_id)
+        .join(Role, UserRole.role_id == Role.id)
+        .options(selectinload(User.department))
+        .where(Role.name == "OFFICER", User.is_active == True)
+    )
+    officers = db.scalars(stmt).all()
+    return [
+        OfficerOut(
+            id=o.id,
+            full_name=o.full_name,
+            email=o.email,
+            phone=o.phone,
+            role="OFFICER",
+            department_name_ml=o.department.name_ml if o.department else "തദ്ദേശ സ്വയംഭരണ വകുപ്പ്",
+        )
+        for o in officers
+    ]
+
+
+@router.post("/{complaint_id}/assign", response_model=ComplaintOut, tags=["Authority & Officer"])
+def assign_complaint_to_officer(
+    complaint_id: uuid.UUID,
+    payload: AssignmentCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Department Authority assigns complaint to a Field Officer with deadline and instructions.
+    """
+    user_role_str = current_user.role.name if hasattr(current_user.role, "name") else str(current_user.role)
+    if user_role_str not in ["AUTHORITY", "SUPER_ADMIN"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="പരാതി ചുമതലപ്പെടുത്താൻ അധികാരിക്ക് മാത്രമേ അനുമതിയുള്ളൂ (Only authorities can assign complaints)",
+        )
+
+    # Verify officer exists
+    officer = db.scalars(select(User).where(User.id == payload.assigned_to_id)).first()
+    if not officer:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="തിരഞ്ഞെടുത്ത ഫീൽഡ് ഓഫീസറെ കണ്ടെത്തിയില്ല (Field Officer not found)",
+        )
+
+    # Fetch complaint
+    stmt = select(Complaint).options(*COMPLAINT_LOAD_OPTIONS).where(Complaint.id == complaint_id)
+    complaint = db.scalars(stmt).first()
+    if not complaint:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="പരാതി കണ്ടെത്തിയില്ല (Complaint not found)",
+        )
+
+    # Deactivate any previous active assignments
+    for a in complaint.assignments:
+        if a.status == "ACTIVE":
+            a.status = "REASSIGNED"
+
+    # Create new assignment
+    new_assignment = ComplaintAssignment(
+        id=uuid.uuid4(),
+        complaint_id=complaint.id,
+        assigned_by=current_user.id,
+        assigned_to=officer.id,
+        instructions=payload.instructions,
+        deadline=payload.deadline,
+        status="ACTIVE",
+    )
+    db.add(new_assignment)
+
+    # Transition status to ASSIGNED if needed
+    prev_status = complaint.current_status
+    if complaint.current_status != "ASSIGNED":
+        validate_status_transition(
+            current_status=complaint.current_status,
+            target_status="ASSIGNED",
+            user_role=user_role_str,
+            is_owner=False,
+        )
+        complaint.current_status = "ASSIGNED"
+
+    # Record Audit Update
+    instructions_text = f" നിർദ്ദേശം: {payload.instructions}" if payload.instructions else ""
+    audit_update = ComplaintUpdate(
+        id=uuid.uuid4(),
+        complaint_id=complaint.id,
+        changed_by=current_user.id,
+        previous_status=prev_status,
+        new_status="ASSIGNED",
+        remarks=f"ഫീൽഡ് ഓഫീസർ {officer.full_name}-നെ ചുമതലപ്പെടുത്തി.{instructions_text}",
+    )
+    db.add(audit_update)
+    db.commit()
+
+    # Reload
+    reloaded = db.scalars(select(Complaint).options(*COMPLAINT_LOAD_OPTIONS).where(Complaint.id == complaint.id)).first()
+    return serialize_complaint(reloaded)
+
+
+@router.get("/officer/tasks", response_model=List[ComplaintOut], tags=["Authority & Officer"])
+def get_officer_tasks(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Retrieve all complaints actively assigned to the authenticated field officer."""
+    stmt = (
+        select(Complaint)
+        .join(ComplaintAssignment, Complaint.id == ComplaintAssignment.complaint_id)
+        .options(*COMPLAINT_LOAD_OPTIONS)
+        .where(
+            ComplaintAssignment.assigned_to == current_user.id,
+            ComplaintAssignment.status == "ACTIVE",
+        )
+        .order_by(desc(Complaint.created_at))
+    )
+    results = db.scalars(stmt).all()
+    return [serialize_complaint(c) for c in results]
+
+
+@router.post("/{complaint_id}/resolve", response_model=ComplaintOut, tags=["Authority & Officer"])
+def resolve_complaint_with_proof(
+    complaint_id: uuid.UUID,
+    payload: ResolutionProofCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Field Officer or Authority resolves complaint and submits photographic proof.
+    """
+    user_role_str = current_user.role.name if hasattr(current_user.role, "name") else str(current_user.role)
+    if user_role_str not in ["OFFICER", "AUTHORITY", "SUPER_ADMIN"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="പരിഹാര തെളിവ് സമർപ്പിക്കാൻ ഫീൽഡ് ഓഫീസർക്ക് മാത്രമേ അനുമതിയുള്ളൂ (Only Field Officers or Authorities can submit resolution proof)",
+        )
+
+    stmt = select(Complaint).options(*COMPLAINT_LOAD_OPTIONS).where(Complaint.id == complaint_id)
+    complaint = db.scalars(stmt).first()
+    if not complaint:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="പരാതി കണ്ടെത്തിയില്ല (Complaint not found)",
+        )
+
+    prev_status = complaint.current_status
+    validate_status_transition(
+        current_status=complaint.current_status,
+        target_status="RESOLVED",
+        user_role=user_role_str,
+        is_owner=False,
+    )
+
+    # Save resolution proof photos
+    for photo in payload.evidence_photos:
+        ev_obj = Evidence(
+            id=uuid.uuid4(),
+            complaint_id=complaint.id,
+            uploaded_by=current_user.id,
+            file_url=photo.file_url,
+            file_type=photo.file_type,
+            file_size_bytes=photo.file_size_bytes,
+            evidence_type="FIELD_RESOLUTION_PROOF",
+        )
+        db.add(ev_obj)
+
+    # Update complaint status
+    complaint.current_status = "RESOLVED"
+
+    # Mark active assignment completed
+    for a in complaint.assignments:
+        if a.status == "ACTIVE":
+            a.status = "COMPLETED"
+
+    # Audit log
+    audit_update = ComplaintUpdate(
+        id=uuid.uuid4(),
+        complaint_id=complaint.id,
+        changed_by=current_user.id,
+        previous_status=prev_status,
+        new_status="RESOLVED",
+        remarks=f"പരിഹാര തെളിവ് രേഖപ്പെടുത്തി: {payload.resolution_notes}",
+    )
+    db.add(audit_update)
+    db.commit()
+
+    reloaded = db.scalars(select(Complaint).options(*COMPLAINT_LOAD_OPTIONS).where(Complaint.id == complaint.id)).first()
+    return serialize_complaint(reloaded)

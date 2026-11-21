@@ -1,5 +1,6 @@
 import { apiRequest } from './api';
 import { Complaint, ComplaintCreatePayload, ComplaintUpdate } from '../types/complaint';
+import { Officer, AssignmentPayload, ResolutionPayload } from '../types/assignment';
 
 export const complaintService = {
   async createComplaint(payload: ComplaintCreatePayload): Promise<Complaint> {
@@ -37,6 +38,28 @@ export const complaintService = {
 
   async getComplaintTimeline(complaintId: string): Promise<ComplaintUpdate[]> {
     return apiRequest<ComplaintUpdate[]>(`/complaints/${complaintId}/timeline`);
+  },
+
+  async getAvailableOfficers(): Promise<Officer[]> {
+    return apiRequest<Officer[]>('/complaints/officers/available');
+  },
+
+  async assignOfficer(complaintId: string, payload: AssignmentPayload): Promise<Complaint> {
+    return apiRequest<Complaint>(`/complaints/${complaintId}/assign`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async getOfficerTasks(): Promise<Complaint[]> {
+    return apiRequest<Complaint[]>('/complaints/officer/tasks');
+  },
+
+  async resolveComplaintWithProof(complaintId: string, payload: ResolutionPayload): Promise<Complaint> {
+    return apiRequest<Complaint>(`/complaints/${complaintId}/resolve`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
 
   async getPublicComplaints(params?: {

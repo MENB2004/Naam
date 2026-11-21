@@ -6,9 +6,9 @@
 
 @layer base {
   body {
-    background-color: var(--naam-mist-bg);
-    color: var(--naam-charcoal);
-    font-family: var(--font-family-malayalam);
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

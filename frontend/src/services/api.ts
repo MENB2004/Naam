@@ -1,5 +1,18 @@
 const API_BASE = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000/api/v1';
 
+function getErrorMessage(data: any, status: number): string {
+  const detail = data?.detail;
+  if (Array.isArray(detail)) {
+    return detail.map((issue) => {
+      const path = Array.isArray(issue?.loc) ? issue.loc.slice(1).join('.') : 'Request';
+      return `${path || 'Request'}: ${issue?.msg || 'Invalid value'}`;
+    }).join(' · ');
+  }
+  if (typeof detail === 'string') return detail;
+  if (typeof data === 'string' && data) return data;
+  return `HTTP Error ${status}`;
+}
+
 export class ApiError extends Error {
   status: number;
   data: any;
@@ -39,11 +52,7 @@ export async function apiRequest<T>(
     const data = isJson ? await response.json() : await response.text();
 
     if (!response.ok) {
-      const errorMsg =
-        (typeof data === 'object' && data?.detail) ||
-        (typeof data === 'string' && data) ||
-        `HTTP Error ${response.status}`;
-      throw new ApiError(response.status, errorMsg, data);
+      throw new ApiError(response.status, getErrorMessage(data, response.status), data);
     }
 
     return data as T;

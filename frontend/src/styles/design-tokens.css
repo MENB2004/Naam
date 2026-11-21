@@ -1,6 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap');
+
 /* NAAM (നാം) Design Tokens & Theme Variables */
 
 :root {
+  --background: 195 43% 97%;
+  --foreground: 210 14% 17%;
+  --primary: 166 88% 26%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 174 84% 32%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 195 25% 94%;
+  --muted-foreground: 184 5% 40%;
+  --accent: 208 80% 44%;
+  --accent-foreground: 0 0% 100%;
+  --border: 195 18% 88%;
+  --ring: 166 88% 26%;
+  --radius: 0.75rem;
+  --font-display: 'Instrument Serif', 'Noto Sans Malayalam', serif;
+  --font-body: 'Inter', 'Noto Sans Malayalam', sans-serif;
+  --shadow-dashboard: 0 25px 80px -12px rgb(0 0 0 / 0.08), 0 0 0 1px rgb(0 0 0 / 0.06);
   /* NAAM Brand Environmental Color Palette */
   --naam-primary-green: #087C63;
   --naam-primary-green-hover: #06614D;
