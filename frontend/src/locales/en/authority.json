@@ -1,0 +1,28 @@
+{
+  "portalTitle": "Authority Triage & Action Portal",
+  "portalSubtitle": "Departmental grievance assessment and field officer assignment desk",
+  "tabs": {
+    "triage": "Triage Queue",
+    "assigned": "Under Action",
+    "resolved": "Resolved",
+    "all": "All Complaints"
+  },
+  "assignModal": {
+    "title": "Assign Field Officer",
+    "subtitle": "Dispatch field staff for site inspection and photographic proof verification",
+    "selectOfficer": "Select Field Officer",
+    "instructions": "Specific Instructions",
+    "instructionsPlaceholder": "Enter inspection or remedial instructions...",
+    "deadline": "Target Completion Deadline",
+    "assignButton": "Confirm Assignment",
+    "cancelButton": "Cancel"
+  },
+  "broadcastAlert": {
+    "title": "Broadcast Emergency Warning",
+    "button": "Broadcast Alert",
+    "alertTitle": "Alert Title",
+    "message": "Message Content",
+    "level": "Severity Level",
+    "district": "Affected District"
+  }
+}

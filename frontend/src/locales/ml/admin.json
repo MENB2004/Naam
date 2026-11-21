@@ -1,0 +1,28 @@
+{
+  "title": "സൂപ്പർ അഡ്മിൻ കൺസോൾ",
+  "subtitle": "പ്ലാറ്റ്‌ഫോം ക്രമീകരണങ്ങളും ഉപയോക്തൃ അവകാശങ്ങളും",
+  "tabs": {
+    "users": "ഉപയോക്താക്കൾ",
+    "departments": "വകുപ്പുകൾ",
+    "auditLogs": "സുരക്ഷാ ഓഡിറ്റ് ലോഗുകൾ"
+  },
+  "kpis": {
+    "totalUsers": "ആകെ ഉപയോക്താക്കൾ",
+    "totalComplaints": "ആകെ പരാതികൾ",
+    "resolvedComplaints": "പരിഹരിച്ച പരാതികൾ",
+    "departments": "സജീവ വകുപ്പുകൾ",
+    "activeAlerts": "സജീവ മുന്നറിയിപ്പുകൾ",
+    "auditLogs": "ഓഡിറ്റ് ലോഗുകൾ"
+  },
+  "userTable": {
+    "name": "പേര്",
+    "email": "ഇമെയിൽ",
+    "role": "റോൾ",
+    "department": "വകുപ്പ്",
+    "status": "അവസ്ഥ",
+    "actions": "നടപടികൾ",
+    "editRole": "റോൾ മാറ്റുക",
+    "active": "സജീവം",
+    "inactive": "നിർജ്ജീവം"
+  }
+}

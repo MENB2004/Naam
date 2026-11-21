@@ -1,6 +1,6 @@
 from typing import List, Optional
 from uuid import UUID
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
 
 class UserRegister(BaseModel):
@@ -8,6 +8,7 @@ class UserRegister(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
     password: str
+    preferred_language: Optional[str] = "ml"
 
 
 class UserLogin(BaseModel):
@@ -28,8 +29,13 @@ class UserProfile(BaseModel):
     department_name_ml: Optional[str] = None
     department_name_en: Optional[str] = None
     is_active: bool
+    preferred_language: str = "ml"
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class LanguagePreferenceUpdate(BaseModel):
+    preferred_language: str = Field(..., pattern="^(ml|en)$")
 
 
 class TokenResponse(BaseModel):

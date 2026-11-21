@@ -20,6 +20,7 @@ from app.schemas.auth import (
     TokenResponse,
     UserProfile,
     RefreshTokenRequest,
+    LanguagePreferenceUpdate,
 )
 
 router = APIRouter()
@@ -54,6 +55,7 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
         password_hash=get_password_hash(user_in.password),
         is_active=True,
         is_verified=False,
+        preferred_language=user_in.preferred_language or "ml",
     )
     db.add(user)
     db.flush()
@@ -76,6 +78,7 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
         role_display_ml=role.display_name_ml if role else "പൗരൻ",
         role_display_en=role.display_name_en if role else "Citizen",
         is_active=user.is_active,
+        preferred_language=user.preferred_language,
     )
 
     token_data = {"sub": str(user.id), "role": profile.role}
@@ -140,6 +143,7 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
         department_name_ml=dept_name_ml,
         department_name_en=dept_name_en,
         is_active=user.is_active,
+        preferred_language=getattr(user, "preferred_language", "ml") or "ml",
     )
 
     token_data = {"sub": str(user.id), "role": role_name}
@@ -148,6 +152,27 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
         refresh_token=create_refresh_token(token_data),
         user=profile,
     )
+
+
+@router.patch("/me/language", response_model=UserProfile, tags=["Authentication"])
+def update_language_preference(
+    lang_in: LanguagePreferenceUpdate,
+    current_user: UserProfile = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Persist user's preferred application language (Malayalam or English)."""
+    user = db.scalars(select(User).where(User.id == current_user.id)).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="ഉപയോക്താവിനെ കണ്ടെത്തിയില്ല (User not found)",
+        )
+    user.preferred_language = lang_in.preferred_language
+    db.commit()
+    db.refresh(user)
+
+    current_user.preferred_language = user.preferred_language
+    return current_user
 
 
 @router.post("/refresh", tags=["Authentication"])

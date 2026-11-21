@@ -1,0 +1,58 @@
+{
+  "appName": "NAAM",
+  "tagline": "People's Environmental Monitoring and Resolution Platform",
+  "nav": {
+    "home": "Home",
+    "about": "About NAAM",
+    "howItWorks": "How It Works",
+    "issues": "Environmental Issues",
+    "map": "Live Map",
+    "analytics": "Analytics",
+    "contact": "Contact",
+    "report": "Report Issue",
+    "myReports": "My Reports",
+    "designSystem": "Design System",
+    "community": "Community",
+    "authority": "Authority",
+    "officer": "Field Officer",
+    "admin": "Admin"
+  },
+  "actions": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "refresh": "Refresh",
+    "filter": "Filter",
+    "search": "Search",
+    "download": "Download",
+    "export": "Export",
+    "confirm": "Confirm",
+    "viewDetails": "View Details",
+    "clear": "Clear",
+    "apply": "Apply"
+  },
+  "status": {
+    "all": "All",
+    "loading": "Loading...",
+    "success": "Completed successfully",
+    "error": "An error occurred",
+    "noData": "No data available",
+    "saved": "Saved successfully"
+  },
+  "roles": {
+    "community": "Citizen",
+    "authority": "Authority",
+    "officer": "Field Officer",
+    "admin": "System Admin"
+  },
+  "skipToContent": "Skip to main content",
+  "language": {
+    "switch": "Switch Language",
+    "current": "English"
+  }
+}

@@ -74,6 +74,7 @@ def get_current_user(
         department_name_ml=dept_name_ml,
         department_name_en=dept_name_en,
         is_active=user.is_active,
+        preferred_language=getattr(user, "preferred_language", "ml") or "ml",
     )
 
 

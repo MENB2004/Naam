@@ -18,6 +18,7 @@ import { IssueMap } from '../features/maps/IssueMap';
 import { AlertBanner } from '../features/alerts/AlertBanner';
 import { AdminDashboard } from '../features/admin/AdminDashboard';
 import { AnalyticsDashboard } from '../features/analytics/AnalyticsDashboard';
+import { SkipToContent } from '../components/common/SkipToContent';
 import { useAuthStore } from '../store/authStore';
 import { Logo } from '../components/common/Logo';
 import { Button } from '../components/ui/button';
@@ -171,8 +172,10 @@ export function PortalDashboardView({
 export default function App() {
   return (
     <BrowserRouter>
+      <SkipToContent />
       <AlertBanner />
-      <Routes>
+      <main id="main-content" tabIndex={-1} className="outline-none">
+        <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/map" element={<IssueMap />} />
@@ -241,6 +244,7 @@ export default function App() {
           }
         />
       </Routes>
+      </main>
     </BrowserRouter>
   );
 }

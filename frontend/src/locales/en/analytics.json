@@ -1,0 +1,28 @@
+{
+  "title": "Environmental Analytics & Intelligence",
+  "subtitle": "Real-time complaints, departmental resolution metrics, and Kerala district analytics",
+  "kpis": {
+    "totalReports": "Total Reports",
+    "resolved": "Resolved",
+    "inProgress": "In Progress",
+    "resolutionRate": "Resolution Rate",
+    "avgResolutionTime": "Avg Resolution",
+    "activeAlerts": "Active Alerts",
+    "hoursUnit": "hrs"
+  },
+  "charts": {
+    "categoryTitle": "Complaint Category Distribution",
+    "categorySubtitle": "Proportion of environmental issues reported",
+    "trendTitle": "Intake vs Resolution Trends",
+    "trendSubtitle": "Daily intake vs resolution activity",
+    "districtTitle": "District-Wise Report Volumes",
+    "districtSubtitle": "Resolution rates across all 14 districts",
+    "reported": "Reported",
+    "resolved": "Resolved",
+    "share": "Share"
+  },
+  "export": {
+    "button": "Export CSV",
+    "exporting": "Exporting..."
+  }
+}

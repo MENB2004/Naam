@@ -1,0 +1,28 @@
+{
+  "title": "Super Admin Console",
+  "subtitle": "System configuration, user role governance, and audit trails",
+  "tabs": {
+    "users": "User Governance",
+    "departments": "Departments",
+    "auditLogs": "Security Audit Logs"
+  },
+  "kpis": {
+    "totalUsers": "Total Users",
+    "totalComplaints": "Total Grievances",
+    "resolvedComplaints": "Resolved Grievances",
+    "departments": "Active Departments",
+    "activeAlerts": "Active Alerts",
+    "auditLogs": "Audit Logs"
+  },
+  "userTable": {
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "department": "Department",
+    "status": "Status",
+    "actions": "Actions",
+    "editRole": "Change Role",
+    "active": "Active",
+    "inactive": "Inactive"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "categories": {
+    "WASTE": "Waste Management",
+    "WATER_POLLUTION": "Water Pollution",
+    "DRAINAGE": "Drainage & Sewage",
+    "FLOODING": "Flooding & Waterlogging",
+    "AIR_POLLUTION": "Air Pollution",
+    "DEFORESTATION": "Deforestation",
+    "ILLEGAL_MINING": "Illegal Mining",
+    "OTHER": "Other Issues"
+  },
+  "statuses": {
+    "SUBMITTED": "Submitted",
+    "VERIFIED": "Verified",
+    "ASSIGNED": "Assigned",
+    "IN_PROGRESS": "In Progress",
+    "ACTION_TAKEN": "Action Taken",
+    "RESOLVED": "Resolved",
+    "REJECTED": "Rejected",
+    "APPEALED": "Appealed"
+  },
+  "severities": {
+    "LOW": "Low",
+    "MEDIUM": "Medium",
+    "HIGH": "High",
+    "CRITICAL": "Critical"
+  },
+  "tracker": {
+    "title": "Complaint Tracker",
+    "subtitle": "Track resolution status in real time using your unique tracking code",
+    "inputPlaceholder": "Enter tracking code (e.g. KL-2026-XXXXX)",
+    "trackButton": "Track Issue",
+    "notFound": "No complaint found with this tracking code. Please verify and try again.",
+    "timeline": "Resolution Audit Timeline",
+    "details": "Complaint Details",
+    "departmentAssigned": "Department Assigned",
+    "officerAssigned": "Assigned Field Officer",
+    "reportedDate": "Reported Date",
+    "lastUpdate": "Last Updated"
+  }
+}
