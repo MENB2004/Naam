@@ -15,9 +15,7 @@ export function LanguageSwitcher({
   onLanguageChange,
   className,
 }: LanguageSwitcherProps) {
-  const [lang, setLang] = useState<Language>(() => {
-    return (localStorage.getItem('naam_language') as Language) || 'ml';
-  });
+  const [lang, setLang] = useState<Language>(() => localStorage.getItem('naam_language') === 'en' ? 'en' : 'ml');
 
   const activeLang = controlledLang || lang;
 
@@ -25,28 +23,28 @@ export function LanguageSwitcher({
     const nextLang: Language = activeLang === 'ml' ? 'en' : 'ml';
     setLang(nextLang);
     localStorage.setItem('naam_language', nextLang);
+    document.documentElement.lang = nextLang;
     if (onLanguageChange) {
       onLanguageChange(nextLang);
     }
   };
 
   useEffect(() => {
-    if (controlledLang) {
-      setLang(controlledLang);
-    }
-  }, [controlledLang]);
+    document.documentElement.lang = activeLang;
+  }, [activeLang]);
 
   return (
     <button
       type="button"
       onClick={toggleLanguage}
+      aria-label={activeLang === 'ml' ? 'ഭാഷ മാറ്റുക: English' : 'Switch language to Malayalam'}
       className={cn(
-        'inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#087C63]',
+        'inline-flex min-h-10 items-center gap-2 rounded-full border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         className
       )}
-      title="ഭാഷ മാറ്റുക / Switch Language"
+      title={activeLang === 'ml' ? 'ഭാഷ മാറ്റുക / Switch language' : 'Switch language / ഭാഷ മാറ്റുക'}
     >
-      <Languages className="w-3.5 h-3.5 text-[#087C63]" />
+      <Languages className="h-3.5 w-3.5 text-primary" />
       <span>{activeLang === 'ml' ? 'മലയാളം' : 'English'}</span>
     </button>
   );

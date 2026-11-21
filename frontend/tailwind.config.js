@@ -26,6 +26,8 @@ export default {
           DEFAULT: 'hsl(var(--accent) / <alpha-value>)',
           foreground: 'hsl(var(--accent-foreground) / <alpha-value>)',
         },
+        warning: 'hsl(var(--warning) / <alpha-value>)',
+        critical: 'hsl(var(--critical) / <alpha-value>)',
         border: 'hsl(var(--border) / <alpha-value>)',
         ring: 'hsl(var(--ring) / <alpha-value>)',
         brand: {
@@ -41,10 +43,10 @@ export default {
         },
       },
       fontFamily: {
-        display: ['var(--font-display)'],
-        body: ['var(--font-body)'],
-        malayalam: ['"Noto Sans Malayalam"', 'system-ui', 'sans-serif'],
-        sans: ['Inter', '"Noto Sans Malayalam"', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'serif'],
+        body: ['var(--font-body)', 'var(--font-malayalam)', 'sans-serif'],
+        malayalam: ['var(--font-malayalam)', 'sans-serif'],
+        sans: ['var(--font-body)', 'var(--font-malayalam)', 'sans-serif'],
       },
     },
   },

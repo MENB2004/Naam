@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { LanguageSwitcher, Language } from '../common/LanguageSwitcher';
 import { Logo } from '../common/Logo';
 import { Shield } from 'lucide-react';
+import { NotificationDropdown } from './NotificationDropdown';
 
 interface PortalHeaderProps {
   currentLang?: Language;
@@ -10,10 +11,10 @@ interface PortalHeaderProps {
 }
 
 const ROLE_BADGES = {
-  COMMUNITY: { ml: 'പൗരൻ', en: 'Citizen', color: 'bg-[#E8F5EE] text-[#087C63]' },
-  AUTHORITY: { ml: 'അധികാരി', en: 'Authority', color: 'bg-amber-100 text-amber-800' },
-  OFFICER: { ml: 'ഫീൽഡ് ഓഫീസർ', en: 'Field Officer', color: 'bg-purple-100 text-purple-800' },
-  ADMIN: { ml: 'സിസ്റ്റം അഡ്മിൻ', en: 'Super Admin', color: 'bg-red-100 text-red-800' },
+  COMMUNITY: { ml: 'പൗരൻ', en: 'Citizen', color: 'bg-primary/10 text-primary' },
+  AUTHORITY: { ml: 'അധികാരി', en: 'Authority', color: 'bg-accent/10 text-accent' },
+  OFFICER: { ml: 'ഫീൽഡ് ഓഫീസർ', en: 'Field Officer', color: 'bg-warning/10 text-warning' },
+  ADMIN: { ml: 'സിസ്റ്റം അഡ്മിൻ', en: 'Super Admin', color: 'bg-violet-100 text-violet-800' },
 };
 
 export function PortalHeader({
@@ -25,51 +26,52 @@ export function PortalHeader({
   const roleInfo = ROLE_BADGES[activeRole];
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/90 border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         {/* Brand */}
         <div className="flex items-center space-x-3">
-          <Logo height={40} />
+          <Logo height={36} />
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${roleInfo.color}`}>
             {currentLang === 'ml' ? roleInfo.ml : roleInfo.en}
           </span>
         </div>
 
         {/* Navigation Items */}
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-600">
+        <nav className="hidden items-center gap-5 text-sm font-medium text-muted-foreground md:flex lg:gap-6">
           <Link
             to="/community/report"
-            className={`hover:text-[#087C63] transition-colors ${
-              location.pathname === '/community/report' ? 'text-[#087C63] font-bold' : ''
+            className={`transition-colors hover:text-primary ${
+              location.pathname === '/community/report' ? 'text-primary font-semibold' : ''
             }`}
           >
             {currentLang === 'ml' ? 'പരാതി നൽകുക' : 'Report Issue'}
           </Link>
           <Link
             to="/map"
-            className={`hover:text-[#087C63] transition-colors ${
-              location.pathname === '/map' ? 'text-[#087C63] font-bold' : ''
+            className={`transition-colors hover:text-primary ${
+              location.pathname === '/map' ? 'text-primary font-semibold' : ''
             }`}
           >
             {currentLang === 'ml' ? 'ലൈവ് മാപ്പ്' : 'Live Map'}
           </Link>
           <Link
             to="/design-system"
-            className={`hover:text-[#087C63] transition-colors ${
-              location.pathname === '/design-system' ? 'text-[#087C63] font-bold' : ''
+            className={`transition-colors hover:text-primary ${
+              location.pathname === '/design-system' ? 'text-primary font-semibold' : ''
             }`}
           >
             {currentLang === 'ml' ? 'ഡിസൈൻ സിസ്റ്റം' : 'Design System'}
           </Link>
         </nav>
 
-        {/* Right Tools: Language Switcher & Quick Actions */}
+        {/* Right Tools: Language Switcher, Notifications & Quick Actions */}
         <div className="flex items-center space-x-3">
+          <NotificationDropdown />
           <LanguageSwitcher currentLang={currentLang} onLanguageChange={onLanguageChange} />
           
           <Link
             to="/login/community"
-            className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-[#087C63] hover:bg-[#06614D] rounded-xl shadow-sm transition"
+            className="hidden min-h-10 items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:inline-flex"
           >
             <Shield className="w-4 h-4 mr-1.5" />
             <span>{currentLang === 'ml' ? 'ലോഗിൻ' : 'Login'}</span>

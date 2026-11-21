@@ -13,11 +13,14 @@
   --muted-foreground: 184 5% 40%;
   --accent: 208 80% 44%;
   --accent-foreground: 0 0% 100%;
+  --warning: 38 92% 50%;
+  --critical: 0 65% 59%;
   --border: 195 18% 88%;
   --ring: 166 88% 26%;
   --radius: 0.75rem;
-  --font-display: 'Instrument Serif', 'Noto Sans Malayalam', serif;
-  --font-body: 'Inter', 'Noto Sans Malayalam', sans-serif;
+  --font-malayalam: 'Noto Sans Malayalam';
+  --font-display: 'Instrument Serif';
+  --font-body: 'Inter';
   --shadow-dashboard: 0 25px 80px -12px rgb(0 0 0 / 0.08), 0 0 0 1px rgb(0 0 0 / 0.06);
   /* NAAM Brand Environmental Color Palette */
   --naam-primary-green: #087C63;
@@ -50,6 +53,22 @@
 }
 
 .dark {
+  color-scheme: dark;
+  --background: 222 47% 11%;
+  --foreground: 210 40% 96%;
+  --primary: 164 74% 38%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 175 54% 30%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 70%;
+  --accent: 208 80% 52%;
+  --accent-foreground: 0 0% 100%;
+  --warning: 38 92% 55%;
+  --critical: 0 65% 62%;
+  --border: 217 24% 26%;
+  --ring: 164 74% 48%;
+  --naam-primary-green: #087C63;
   --naam-mist-bg: #0F172A;
   --naam-card-bg: #1E293B;
   --naam-charcoal: #F8FAFC;

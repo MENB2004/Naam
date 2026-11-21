@@ -18,8 +18,9 @@ export const Logo: React.FC<LogoProps> = ({
     <img
       src="/naam-logo.png"
       alt="NAAM (നാം) — Community Environmental Communication and Monitoring Platform"
+      decoding="async"
       style={{ height: typeof height === 'number' ? `${height}px` : height }}
-      className={`w-auto object-contain select-none transition-transform duration-200 ${className}`}
+      className={`max-w-full w-auto object-contain select-none transition-transform duration-200 ${className}`}
     />
   );
 
@@ -27,7 +28,7 @@ export const Logo: React.FC<LogoProps> = ({
     return (
       <Link
         to={to}
-        className="inline-flex items-center focus:outline-none focus:ring-2 focus:ring-[#087C63] focus:ring-offset-2 rounded-lg"
+        className="inline-flex items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         {imgElement}
       </Link>

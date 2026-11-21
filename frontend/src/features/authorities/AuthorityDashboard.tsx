@@ -17,6 +17,8 @@ import { Complaint } from '../../types/complaint';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { Logo } from '../../components/common/Logo';
 import { AssignOfficerModal } from './AssignOfficerModal';
+import { BroadcastAlertModal } from '../alerts/BroadcastAlertModal';
+import { NotificationDropdown } from '../../components/layout/NotificationDropdown';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
 
@@ -32,6 +34,7 @@ export const AuthorityDashboard: React.FC = () => {
 
   // Modal State
   const [selectedComplaintForAssign, setSelectedComplaintForAssign] = useState<Complaint | null>(null);
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState<boolean>(false);
 
   const fetchComplaints = () => {
     setIsLoading(true);
@@ -85,6 +88,19 @@ export const AuthorityDashboard: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAlertModalOpen(true)}
+              className="text-xs text-red-700 border-red-200 hover:bg-red-50 font-bold"
+            >
+              <AlertTriangle className="w-3.5 h-3.5 mr-1 text-red-600" />
+              <span className="hidden sm:inline">മുന്നറിയിപ്പ് നൽകുക</span>
+              <span className="sm:hidden">അലേർട്ട്</span>
+            </Button>
+
+            <NotificationDropdown />
+
             <div className="text-right hidden md:block">
               <div className="text-xs font-bold text-slate-800">{user?.fullName}</div>
               <div className="text-[11px] text-blue-700 font-semibold">{user?.departmentNameMl || 'തദ്ദേശ സ്വയംഭരണ വകുപ്പ്'}</div>
@@ -321,6 +337,15 @@ export const AuthorityDashboard: React.FC = () => {
           }}
         />
       )}
+
+      {/* Broadcast Alert Modal */}
+      <BroadcastAlertModal
+        isOpen={isAlertModalOpen}
+        onClose={() => setIsAlertModalOpen(false)}
+        onSuccess={() => {
+          fetchComplaints();
+        }}
+      />
     </div>
   );
 };

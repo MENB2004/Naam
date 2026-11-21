@@ -20,6 +20,7 @@ import { complaintService } from '../../services/complaintService';
 import { Complaint } from '../../types/complaint';
 import { Logo } from '../../components/common/Logo';
 import { StatusBadge } from '../../components/common/StatusBadge';
+import { NotificationDropdown } from '../../components/layout/NotificationDropdown';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
 
@@ -76,6 +77,7 @@ export const CitizenDashboard: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3">
+            <NotificationDropdown />
             <Link to="/community/report">
               <Button variant="primary" size="sm" className="hidden sm:inline-flex bg-[#087C63]">
                 <Plus className="w-4 h-4 mr-1.5" />

@@ -15,6 +15,7 @@ import { ComplaintDetail } from '../features/complaints/ComplaintDetail';
 import { AuthorityDashboard } from '../features/authorities/AuthorityDashboard';
 import { OfficerTaskList } from '../features/field-officer/OfficerTaskList';
 import { IssueMap } from '../features/maps/IssueMap';
+import { AlertBanner } from '../features/alerts/AlertBanner';
 import { useAuthStore } from '../store/authStore';
 import { Logo } from '../components/common/Logo';
 import { Button } from '../components/ui/button';
@@ -48,7 +49,7 @@ function PortalDashboardView({
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#F0F7FA]">
+    <div className="min-h-screen bg-background text-foreground">
       <header className="bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -168,6 +169,7 @@ function PortalDashboardView({
 export default function App() {
   return (
     <BrowserRouter>
+      <AlertBanner />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />

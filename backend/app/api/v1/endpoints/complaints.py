@@ -23,6 +23,7 @@ from app.schemas.complaint import (
     STATUS_ML_MAP,
 )
 from app.services.complaint_state_machine import validate_status_transition
+from app.services.notification_service import notify_status_change, notify_officer_assignment
 
 router = APIRouter()
 
@@ -377,6 +378,16 @@ def update_complaint_status(
     db.add(audit_update)
     db.commit()
 
+    # Dispatch notification to reporting citizen
+    notify_status_change(
+        db=db,
+        reporter_id=complaint.reporter_id,
+        complaint_id=complaint.id,
+        tracking_code=complaint.tracking_code,
+        new_status=new_status_upper,
+        remarks=payload.remarks.strip(),
+    )
+
     # Reload complaint
     db.refresh(complaint)
     return serialize_complaint(complaint)
@@ -484,6 +495,16 @@ def assign_complaint_to_officer(
     db.add(audit_update)
     db.commit()
 
+    # Dispatch notifications to officer and citizen
+    notify_officer_assignment(
+        db=db,
+        officer_id=officer.id,
+        reporter_id=complaint.reporter_id,
+        complaint_id=complaint.id,
+        tracking_code=complaint.tracking_code,
+        instructions=payload.instructions,
+    )
+
     # Reload
     reloaded = db.scalars(select(Complaint).options(*COMPLAINT_LOAD_OPTIONS).where(Complaint.id == complaint.id)).first()
     return serialize_complaint(reloaded)
@@ -574,6 +595,16 @@ def resolve_complaint_with_proof(
     )
     db.add(audit_update)
     db.commit()
+
+    # Dispatch notification to reporting citizen
+    notify_status_change(
+        db=db,
+        reporter_id=complaint.reporter_id,
+        complaint_id=complaint.id,
+        tracking_code=complaint.tracking_code,
+        new_status="RESOLVED",
+        remarks=f"പരിഹാര തെളിവ് രേഖപ്പെടുത്തി: {payload.resolution_notes}",
+    )
 
     reloaded = db.scalars(select(Complaint).options(*COMPLAINT_LOAD_OPTIONS).where(Complaint.id == complaint.id)).first()
     return serialize_complaint(reloaded)

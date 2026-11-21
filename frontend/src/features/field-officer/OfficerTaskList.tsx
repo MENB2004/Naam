@@ -16,6 +16,7 @@ import { complaintService } from '../../services/complaintService';
 import { Complaint } from '../../types/complaint';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { Logo } from '../../components/common/Logo';
+import { NotificationDropdown } from '../../components/layout/NotificationDropdown';
 import { ResolutionProofModal } from './ResolutionProofModal';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
@@ -80,6 +81,7 @@ export const OfficerTaskList: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3">
+            <NotificationDropdown />
             <div className="text-right hidden sm:block">
               <div className="text-xs font-bold text-slate-800">{user?.fullName}</div>
               <div className="text-[11px] text-amber-700 font-semibold">{user?.roleDisplayMl || 'ഫീൽഡ് ഓഫീസർ'}</div>

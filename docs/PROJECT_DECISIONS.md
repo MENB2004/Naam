@@ -11,6 +11,7 @@
 - **ADR-008:** Approved formal Complaint Lifecycle State Machine engine with role-based transition validation, immutable audit log history in `complaint_updates`, citizen appeal workflows, and bilingual status reporting.
 - **ADR-009:** Approved Department Authority Triage Queue and Mobile Field Officer Inspection Desk architecture with turn-by-turn GPS routing links, field assignment dispatching, and mandatory photographic resolution proof.
 - **ADR-010:** Approved Interactive Leaflet Geolocation & Sanitized Spatial Query Architecture with PostGIS bounding-box (`GET /map/clusters`) and radial proximity queries (`GET /map/nearby`), strict PII exclusion for public map layers, severity-color-coded SVG pin markers, and client-side device GPS alignment.
+- **ADR-011:** Approved Environmental Alert Broadcast System & In-App Notification Dispatch Architecture with official emergency banner tickers, source credibility taxonomy (`OFFICIAL_WARNING`, `COMMUNITY_REPORT`, `SIMULATED_DEMO_ALERT`), automated lifecycle event triggers for status transitions and officer task assignments, and unread notification bell dropdowns.
 
 ## 2. User Approvals Log
 | Date | Milestone / Phase | Decision / Instruction | Approved By |
@@ -26,3 +27,4 @@
 | 2026-11-21 | Branding: Official Logo | Integrated official NAAM logo in headers, hero section, favicon, auth views, and design showcase. | User Approved ("add this as a logo") |
 | 2026-11-21 | Phase 07: Authority & Officer | Authority triage dashboard, officer assignment modal, mobile task desk, GPS routing links, resolution proof photos, 20/20 tests passing. | User Approved ("do phase 7") |
 | 2026-11-22 | Phase 08: Maps & Geolocation | Public interactive Leaflet map (/map), category/status/district filter bar, sanitized geo feeds, nearby proximity queries, 25/25 tests passing. | Executed & Verified |
+| 2026-11-22 | Phase 09: Alerts & Notifications | Public emergency warning banner, authority broadcast modal, notification lifecycle dispatch service, unread notification bell dropdown, 30/30 tests passing. | User Approved ("do next phase") |

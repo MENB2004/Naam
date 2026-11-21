@@ -73,7 +73,7 @@ export const RegisterForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F7FA] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Logo height={56} className="mx-auto mb-2" />
       </div>
