@@ -83,3 +83,4 @@ coverage.xml
 uploads/
 sample-data/field_photos/private/
 *.log
+.neon

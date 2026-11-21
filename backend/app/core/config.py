@@ -17,13 +17,21 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
+        "https://frontend-nine-orpin-72.vercel.app",
+        "https://frontend-l3vmz8bk1-menbs-projects.vercel.app",
     ]
 
-    # Database (Defaults to local SQLite, or postgresql+pg8000:// for pure-Python PostgreSQL)
+    # Database (Defaults to local SQLite, or postgresql+pg8000:// for pure-Python PostgreSQL / Neon)
     DATABASE_URL: str = "sqlite:///./naam_dev.db"
+    DATABASE_URL_UNPOOLED: str | None = None
+    NEON_BRANCH: str | None = None
+    NEON_BRANCH_ID: str | None = None
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", case_sensitive=True, extra="ignore"
+        env_file=(".env.local", ".env", "../.env.local", "../.env"),
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+        extra="ignore",
     )
 
 

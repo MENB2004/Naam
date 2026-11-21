@@ -1,3 +1,4 @@
+import ssl
 import uuid
 from collections.abc import Generator
 
@@ -8,17 +9,28 @@ from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from app.core.config import settings
 
+db_url = settings.DATABASE_URL
+connect_args = {}
+
 # If running on SQLite (local dev or test fallback), disable SpatiaLite DDL crashes
-if "sqlite" in settings.DATABASE_URL:
+if "sqlite" in db_url:
     geoalchemy2.admin.dialects.sqlite.after_create = lambda *args, **kwargs: None
     geoalchemy2.admin.dialects.sqlite.before_drop = lambda *args, **kwargs: None
-
-connect_args = {}
-if "sqlite" in settings.DATABASE_URL:
     connect_args = {"check_same_thread": False}
+elif "postgres" in db_url:
+    # Normalize Postgres / Neon connection URL for pure-Python pg8000 driver
+    if db_url.startswith("postgresql://") or db_url.startswith("postgres://"):
+        base_part = db_url.split("?")[0]
+        if base_part.startswith("postgresql://"):
+            db_url = base_part.replace("postgresql://", "postgresql+pg8000://", 1)
+        elif base_part.startswith("postgres://"):
+            db_url = base_part.replace("postgres://", "postgresql+pg8000://", 1)
+
+    if "pg8000" in db_url:
+        connect_args["ssl_context"] = ssl.create_default_context()
 
 engine = create_engine(
-    settings.DATABASE_URL,
+    db_url,
     echo=False,
     connect_args=connect_args,
 )

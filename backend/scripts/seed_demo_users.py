@@ -55,8 +55,10 @@ DEMO_USERS = [
 
 
 def seed_demo_users() -> None:
-    if not settings.DATABASE_URL.startswith("sqlite"):
-        raise SystemExit("Demo users may only be seeded into a local SQLite database.")
+    if not settings.DATABASE_URL.startswith("sqlite") and "--force" not in sys.argv:
+        raise SystemExit(
+            "Demo users may only be seeded into a local SQLite database unless --force is specified."
+        )
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
