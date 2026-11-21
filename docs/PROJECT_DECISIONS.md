@@ -1,0 +1,19 @@
+# NAAM (നാം) — Project Decisions and Approvals Log
+
+## 1. Architectural Decisions Recorded
+- **ADR-001:** Approved Modular Monolith architecture using React + Vite + TypeScript (Frontend) and FastAPI + SQLAlchemy 2.0 (Backend).
+- **ADR-002:** Approved PostgreSQL 16 + PostGIS 3.4 for relational and geospatial storage.
+- **ADR-003:** Approved Malayalam-first user interface with native JSON localization keys and standard Noto Sans Malayalam typography.
+- **ADR-004:** Approved 4-tier Role-Based Access Control (Community, Authority, Field Officer, Super Admin).
+- **ADR-005:** Approved phase execution model with temporary execution markdown files deleted strictly upon verified phase completion.
+- **ADR-006:** Approved pure-Python PBKDF2-HMAC-SHA256 password hashing and pure-Python database drivers (`pg8000`, `sqlite3`) to guarantee 100% compatibility with Windows Defender Application Control (WDAC).
+
+## 2. User Approvals Log
+| Date | Milestone / Phase | Decision / Instruction | Approved By |
+|---|---|---|---|
+| 2026-11-21 | Master Architecture & Docs | Master development prompt initialized; comprehensive documentation generated. | User Approved ("yes") |
+| 2026-11-21 | Phase 00: Environment Setup | Windows 11 environment verified: Node v22.14, npm 10.9.2, Python 3.12.10, uv 0.13.9, Git 2.56.1. | Completed & Verified |
+| 2026-11-21 | Phase 01: Repository Foundation | Scaffolding complete: branch phase-01-foundation, frontend Vite+React+TS build passing, backend FastAPI+uv passing tests. | Completed & Verified |
+| 2026-11-21 | Phase 02: UI/UX & Design System | Noto Sans Malayalam, color tokens, StatusBadge (8 states), Button, Card, Input, LanguageSwitcher, and /design-system showcase verified. | Completed & Verified |
+| 2026-11-21 | Phase 03: Database Foundation | SQLAlchemy 2.0 models, pure-Python driver support (pg8000/sqlite), idempotent master data seeder (4 roles, 4 departments), test suite passing. | Completed & Verified |
+| 2026-11-21 | Phase 04: Authentication & RBAC | Multi-portal auth (/login/community, /login/authority, /login/officer, /login/admin), citizen register, JWT rotation, ProtectedRoute guards, 11/11 tests passing. | Completed & Verified |

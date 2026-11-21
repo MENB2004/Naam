@@ -1,0 +1,41 @@
+/* NAAM (നാം) Design Tokens & Theme Variables */
+
+:root {
+  /* NAAM Brand Environmental Color Palette */
+  --naam-primary-green: #087C63;
+  --naam-primary-green-hover: #06614D;
+  --naam-secondary-teal: #0D9488;
+  --naam-waterway-blue: #1677C8;
+  --naam-soft-green: #E8F5EE;
+  --naam-mist-bg: #F0F7FA;
+  --naam-warning-amber: #F59E0B;
+  --naam-critical-red: #DC5353;
+  
+  /* Neutral Palette */
+  --naam-charcoal: #1E293B;
+  --naam-slate: #64748B;
+  --naam-border: #E2E8F0;
+  --naam-card-bg: #FFFFFF;
+
+  /* Typography */
+  --font-family-malayalam: 'Noto Sans Malayalam', 'Manjari', sans-serif;
+  --font-family-sans: 'Inter', 'Noto Sans Malayalam', sans-serif;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+.dark {
+  --naam-mist-bg: #0F172A;
+  --naam-card-bg: #1E293B;
+  --naam-charcoal: #F8FAFC;
+  --naam-slate: #94A3B8;
+  --naam-border: #334155;
+  --naam-soft-green: #064E3B;
+}
