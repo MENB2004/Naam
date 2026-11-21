@@ -25,7 +25,7 @@ export const AlertBanner: React.FC = () => {
         if (isMounted && data && data.length > 0) {
           setAlerts(data);
         }
-      } catch (err) {
+      } catch {
         // Silent fail for public alerts banner
       }
     };

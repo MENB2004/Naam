@@ -35,7 +35,7 @@ export function DesignShowcase() {
   const [hasError, setHasError] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F0F7FA] pb-16">
+    <div className="min-h-screen bg-background text-foreground pb-16">
       <PortalHeader currentLang={lang} onLanguageChange={setLang} activeRole="ADMIN" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-12">

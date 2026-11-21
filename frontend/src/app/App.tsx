@@ -16,6 +16,7 @@ import { AuthorityDashboard } from '../features/authorities/AuthorityDashboard';
 import { OfficerTaskList } from '../features/field-officer/OfficerTaskList';
 import { IssueMap } from '../features/maps/IssueMap';
 import { AlertBanner } from '../features/alerts/AlertBanner';
+import { AdminDashboard } from '../features/admin/AdminDashboard';
 import { useAuthStore } from '../store/authStore';
 import { Logo } from '../components/common/Logo';
 import { Button } from '../components/ui/button';
@@ -32,7 +33,7 @@ function LandingPage() {
   );
 }
 // Protected Portal Layout Preview for Phase 04 Verification
-function PortalDashboardView({
+export function PortalDashboardView({
   titleMl,
   titleEn,
   roleLabel,
@@ -233,13 +234,7 @@ export default function App() {
           path="/admin"
           element={
             <ProtectedRoute allowedRoles={['SUPER_ADMIN']} fallbackLoginRoute="/login/admin">
-              <PortalDashboardView
-                titleMl="സിസ്റ്റം അഡ്മിൻ കൺസോൾ"
-                titleEn="Super Admin Console"
-                roleLabel="സിസ്റ്റം അഡ്മിൻ"
-                color="#7E22CE"
-                nextPhaseText="ഫേസ് 10-ൽ ഡിപ്പാർട്ട്‌മെന്റുകൾ, യൂസർ അക്കൗണ്ടുകൾ, സെക്യൂരിറ്റി ഓഡിറ്റ് ലോഗുകൾ എന്നിവ കൈകാര്യം ചെയ്യാം."
-              />
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />

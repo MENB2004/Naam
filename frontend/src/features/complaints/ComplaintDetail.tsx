@@ -86,7 +86,7 @@ export const ComplaintDetail: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F0F7FA] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
         <div className="text-xs text-slate-500 flex items-center space-x-2">
           <Clock className="w-4 h-4 animate-spin text-[#087C63]" />
           <span>വിവരങ്ങൾ ലഭ്യമാക്കുന്നു...</span>
@@ -97,7 +97,7 @@ export const ComplaintDetail: React.FC = () => {
 
   if (error || !complaint) {
     return (
-      <div className="min-h-screen bg-[#F0F7FA] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
         <Card className="max-w-md w-full p-6 text-center shadow-lg">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
           <h3 className="text-base font-bold text-slate-800">പരാതി കണ്ടെത്തിയില്ല</h3>
@@ -152,7 +152,7 @@ export const ComplaintDetail: React.FC = () => {
   const availableActions = getAvailableActions();
 
   return (
-    <div className="min-h-screen bg-[#F0F7FA] py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background text-foreground py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Navigation */}
         <div className="flex items-center justify-between">

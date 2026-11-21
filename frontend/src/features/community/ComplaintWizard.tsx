@@ -237,7 +237,7 @@ export const ComplaintWizard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F7FA] py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background text-foreground py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         {/* Header Navigation */}
         <div className="flex items-center justify-between mb-6">

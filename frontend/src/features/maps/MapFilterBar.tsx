@@ -66,15 +66,15 @@ export const MapFilterBar: React.FC<MapFilterBarProps> = ({
   onRefresh,
 }) => {
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/80 p-4 transition-all max-w-full">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-100">
+    <div className="max-w-full rounded-2xl border border-border/80 bg-background/95 p-4 shadow-md backdrop-blur-md transition-colors">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 font-bold text-primary">
             <Filter className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-slate-800">മാപ്പ് ഫിൽട്ടറുകൾ (Filter Map)</h3>
-            <p className="text-[10px] text-slate-500">കണ്ടെത്തിയ പരാതികൾ: {totalPoints}</p>
+            <h3 className="text-xs font-bold text-foreground">മാപ്പ് ഫിൽട്ടറുകൾ (Filter Map)</h3>
+            <p className="text-[10px] text-muted-foreground">കണ്ടെത്തിയ പരാതികൾ: {totalPoints}</p>
           </div>
         </div>
 
@@ -84,7 +84,7 @@ export const MapFilterBar: React.FC<MapFilterBarProps> = ({
             size="sm"
             onClick={onRefresh}
             disabled={isLoading}
-            className="h-8 px-2 text-xs text-slate-600 hover:text-emerald-700"
+            className="min-h-9 px-2 text-xs text-muted-foreground hover:text-primary"
           >
             <RefreshCw className={`w-3.5 h-3.5 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
             റിഫ്രഷ്
@@ -93,7 +93,7 @@ export const MapFilterBar: React.FC<MapFilterBarProps> = ({
             variant="ghost"
             size="sm"
             onClick={onReset}
-            className="h-8 px-2 text-xs text-red-600 hover:bg-red-50"
+            className="min-h-9 px-2 text-xs text-critical hover:bg-critical/10"
           >
             <X className="w-3.5 h-3.5 mr-1" />
             റീസെറ്റ്
@@ -104,30 +104,32 @@ export const MapFilterBar: React.FC<MapFilterBarProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Search Input */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+          <label htmlFor="map-search" className="mb-1 block text-[11px] font-semibold text-muted-foreground">
             തിരയുക (Search Title / ID)
           </label>
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input
+              id="map-search"
               type="text"
               value={filters.search}
               onChange={(e) => onChange({ ...filters, search: e.target.value })}
               placeholder="കീവേഡ് ടൈപ്പ് ചെയ്യുക..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white"
+              className="min-h-11 w-full rounded-lg border border-border bg-muted py-2 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/75 focus:bg-background focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
         </div>
 
         {/* Category Dropdown */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+          <label htmlFor="map-category" className="mb-1 block text-[11px] font-semibold text-muted-foreground">
             വിഭാഗം (Category)
           </label>
           <select
+            id="map-category"
             value={filters.category}
             onChange={(e) => onChange({ ...filters, category: e.target.value })}
-            className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white font-medium"
+            className="min-h-11 w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs font-medium text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-ring"
           >
             {CATEGORIES.map((c) => (
               <option key={c.value} value={c.value}>
@@ -139,13 +141,14 @@ export const MapFilterBar: React.FC<MapFilterBarProps> = ({
 
         {/* Status Dropdown */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+          <label htmlFor="map-status" className="mb-1 block text-[11px] font-semibold text-muted-foreground">
             പരാതി നില (Status)
           </label>
           <select
+            id="map-status"
             value={filters.status}
             onChange={(e) => onChange({ ...filters, status: e.target.value })}
-            className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white font-medium"
+            className="min-h-11 w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs font-medium text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="ACTIVE">സജീവം (Active / In Progress)</option>
             <option value="RESOLVED">പരിഹരിച്ചവ (Resolved)</option>
@@ -155,13 +158,14 @@ export const MapFilterBar: React.FC<MapFilterBarProps> = ({
 
         {/* District Dropdown */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+          <label htmlFor="map-district" className="mb-1 block text-[11px] font-semibold text-muted-foreground">
             ജില്ല (District)
           </label>
           <select
+            id="map-district"
             value={filters.district}
             onChange={(e) => onChange({ ...filters, district: e.target.value })}
-            className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white font-medium"
+            className="min-h-11 w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs font-medium text-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="ALL">എല്ലാ ജില്ലകളും (All Kerala)</option>
             {KERALA_DISTRICTS.map((d) => (

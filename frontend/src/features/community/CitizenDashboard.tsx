@@ -64,9 +64,9 @@ export const CitizenDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F7FA]">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+      <header className="sticky top-0 z-40 bg-background text-foreground border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Logo height={38} />

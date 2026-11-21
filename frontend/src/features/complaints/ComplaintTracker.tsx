@@ -79,7 +79,7 @@ export const ComplaintTracker: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F7FA] py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background text-foreground py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Navigation */}
         <div className="flex items-center justify-between">

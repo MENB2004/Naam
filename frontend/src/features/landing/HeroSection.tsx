@@ -33,7 +33,7 @@ function LandscapeBackdrop() {
       <path d="M0 345 C170 275 270 352 420 292 C590 225 660 315 830 240 C1000 160 1120 270 1260 210 C1340 178 1400 205 1440 180 V520 H0Z" fill="hsl(var(--primary)/.09)"/>
       <path d="M0 415 C230 345 300 410 520 355 C720 305 870 400 1040 330 C1210 260 1330 330 1440 285 V520 H0Z" fill="hsl(var(--accent)/.08)"/>
     </svg>
-    <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-white/25 to-background/75"/>
+    <div className="absolute inset-0 bg-gradient-to-b from-background/35 via-background/25 to-background/75"/>
   </div>;
 }
 
@@ -61,18 +61,18 @@ export function HeroSection() {
       </nav>
       <div className="flex items-center gap-2 md:gap-3">
         {isAuthenticated && user && <div className="hidden items-center gap-2 md:flex"><span className="max-w-36 truncate text-xs text-muted-foreground">{user.fullName}</span><button type="button" onClick={() => logout()} aria-label="Log out" className="grid h-9 w-9 place-items-center rounded-full border border-border bg-white/60 text-muted-foreground hover:text-primary"><LogOut size={15}/></button></div>}
-        <div className="hidden sm:block"><LanguageSwitcher currentLang={language} onLanguageChange={changeLanguage} className="rounded-full border-border/80 bg-white/60 text-foreground shadow-none"/></div>
-        <button type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(v => !v)} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white/65 text-foreground lg:hidden">{menuOpen ? <X size={18}/> : <Menu size={18}/>}</button>
+        <div className="hidden sm:block"><LanguageSwitcher currentLang={language} onLanguageChange={changeLanguage} className="border-border/80 bg-background/80 text-foreground shadow-none"/></div>
+        <button type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(v => !v)} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-background/80 text-foreground lg:hidden">{menuOpen ? <X size={18}/> : <Menu size={18}/>}</button>
         <button type="button" onClick={() => navigate('/community/report')} className="hidden rounded-full bg-primary px-4 py-2.5 text-xs font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90 sm:inline-flex md:px-5 md:text-sm">{language === 'ml' ? 'റിപ്പോർട്ട് ചെയ്യുക' : 'Report an Issue'}</button>
       </div>
-      <AnimatePresence>{menuOpen && <motion.div initial={reducedMotion ? false : {opacity:0,y:-8}} animate={{opacity:1,y:0}} exit={reducedMotion ? undefined : {opacity:0,y:-8}} transition={{duration:reducedMotion ? 0 : .18}} className="absolute left-4 right-4 top-[calc(100%-4px)] z-40 rounded-2xl border border-border bg-white/95 p-3 shadow-xl backdrop-blur-xl lg:hidden">
+      <AnimatePresence>{menuOpen && <motion.div initial={reducedMotion ? false : {opacity:0,y:-8}} animate={{opacity:1,y:0}} exit={reducedMotion ? undefined : {opacity:0,y:-8}} transition={{duration:reducedMotion ? 0 : .18}} className="absolute left-4 right-4 top-[calc(100%-4px)] z-40 rounded-2xl border border-border bg-background/95 p-3 shadow-xl backdrop-blur-xl lg:hidden">
         <nav className="flex flex-col">{t.nav.map((label,i)=><a key={label} href={links[i]} onClick={()=>setMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted">{label}</a>)}</nav>
-        <div className="mt-2 flex items-center justify-between border-t border-border pt-3"><LanguageSwitcher currentLang={language} onLanguageChange={changeLanguage}/><div className="flex items-center gap-2">{isAuthenticated && user && <button type="button" onClick={() => logout()} className="rounded-full border border-border px-3 py-2 text-[11px] text-muted-foreground">{language === 'ml' ? 'ലോഗ് ഔട്ട്' : 'Log out'}</button>}<button type="button" onClick={()=>navigate('/community/report')} className="rounded-full bg-primary px-4 py-2.5 text-xs font-semibold text-white">{t.report}</button></div></div>
+        <div className="mt-2 flex items-center justify-between border-t border-border pt-3"><LanguageSwitcher currentLang={language} onLanguageChange={changeLanguage}/><div className="flex items-center gap-2">{isAuthenticated && user && <button type="button" onClick={() => logout()} className="rounded-full border border-border px-3 py-2 text-[11px] text-muted-foreground">{language === 'ml' ? 'ലോഗ് ഔട്ട്' : 'Log out'}</button>}<button type="button" onClick={()=>navigate('/community/report')} className="rounded-full bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground">{t.report}</button></div></div>
       </motion.div>}</AnimatePresence>
     </header>
 
     <div className="relative z-10 flex min-h-0 w-full flex-1 flex-col items-center overflow-hidden px-4 pt-2 text-center sm:px-6 sm:pt-4">
-      <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={transition(0)} className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-white/75 px-4 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur-md md:mb-5 md:text-sm"><Leaf size={14} className="text-primary"/><span>{t.badge}</span></motion.div>
+      <motion.div lang={language} initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={transition(0)} className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-background/85 px-4 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur-md md:mb-5 md:text-sm"><Leaf size={14} className="text-primary"/><span>{t.badge}</span></motion.div>
       <motion.h1 lang={language} initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={transition(.1)} className="max-w-4xl font-malayalam text-[clamp(2rem,5.2vw,4.5rem)] font-semibold leading-[1.35] tracking-normal text-foreground md:leading-[1.3]">
         {language === 'ml' ? <>{t.headingA}<br className="hidden sm:block"/><span className="text-primary"> {t.headingB}</span></> : <>{t.headingA}<br/><span className="font-display text-[1.12em] font-normal italic text-primary">{t.headingB}</span></>}
       </motion.h1>

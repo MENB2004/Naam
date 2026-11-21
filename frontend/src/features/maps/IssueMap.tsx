@@ -28,18 +28,18 @@ const KERALA_BOUNDS: [[number, number], [number, number]] = [
 
 // Helper to generate dynamic colored SVG pin markers
 function createCustomPin(severity: string, status: string) {
-  let color = '#EA580C'; // Default orange
+  let color = 'var(--naam-warning-amber)';
 
   if (status === 'RESOLVED') {
-    color = '#10B981'; // Green
+    color = 'var(--naam-primary-green)';
   } else if (severity === 'EMERGENCY') {
-    color = '#DC2626'; // Bright Red
+    color = 'var(--naam-critical-red)';
   } else if (severity === 'HIGH') {
-    color = '#EA580C'; // Amber-Red
+    color = 'var(--naam-critical-red)';
   } else if (severity === 'MEDIUM') {
-    color = '#D97706'; // Amber
+    color = 'var(--naam-warning-amber)';
   } else if (severity === 'LOW') {
-    color = '#059669'; // Emerald
+    color = 'var(--naam-secondary-teal)';
   }
 
   const isEmergency = severity === 'EMERGENCY' && status !== 'RESOLVED';
@@ -176,31 +176,31 @@ export const IssueMap: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-100 font-sans">
+    <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-background font-body text-foreground">
       {/* Top Header */}
-      <header className="h-16 bg-white border-b border-slate-200 z-20 px-4 sm:px-6 flex items-center justify-between shadow-sm flex-shrink-0">
+      <header className="z-20 flex h-16 shrink-0 items-center justify-between gap-2 border-b border-border bg-background/95 px-3 shadow-sm backdrop-blur-md sm:gap-4 sm:px-6">
         <div className="flex items-center space-x-3">
           <Link to="/">
             <Logo height={38} />
           </Link>
-          <div className="border-l border-slate-200 pl-3 hidden sm:block">
-            <span className="font-bold text-sm text-slate-900 tracking-tight block">
+          <div className="hidden border-l border-border pl-3 sm:block">
+            <span className="block text-sm font-bold tracking-tight text-foreground">
               ലൈവ് പരിസ്ഥിതി മാപ്പ് (Live Environmental Map)
             </span>
-            <span className="text-[10px] text-slate-500 block">
+            <span className="block text-[10px] text-muted-foreground">
               കേരളത്തിലെ പരിസ്ഥിതി പരാതികളുടെ സമഗ്ര ജിയോ-മാപ്പിംഗ്
             </span>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 sm:space-x-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={handleLocateMe}
-            className="text-xs text-slate-700 hover:text-emerald-700 border-slate-300"
+            className="text-xs text-foreground"
           >
-            <Navigation className="w-3.5 h-3.5 mr-1 text-emerald-600" />
+            <Navigation className="mr-1 h-3.5 w-3.5 text-primary" />
             <span className="hidden sm:inline">എന്റെ അടുത്ത് (Near Me)</span>
             <span className="sm:hidden">GPS</span>
           </Button>
@@ -209,7 +209,7 @@ export const IssueMap: React.FC = () => {
             variant="outline"
             size="sm"
             onClick={() => setShowFilterBar(!showFilterBar)}
-            className="text-xs text-slate-700 border-slate-300"
+            className="text-xs text-foreground"
           >
             <SlidersHorizontal className="w-3.5 h-3.5 mr-1" />
             <span className="hidden sm:inline">ഫിൽട്ടറുകൾ</span>
@@ -217,7 +217,7 @@ export const IssueMap: React.FC = () => {
           </Button>
 
           <Link to="/community/report">
-            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-xs">
+            <Button size="sm" className="text-xs">
               <PlusCircle className="w-3.5 h-3.5 mr-1" />
               <span className="hidden sm:inline">പരാതി സമർപ്പിക്കുക</span>
               <span className="sm:hidden">റിപ്പോർട്ട്</span>
@@ -265,6 +265,14 @@ export const IssueMap: React.FC = () => {
           </div>
         )}
 
+        {!isLoading && !error && filteredPoints.length === 0 && (
+          <div role="status" className="pointer-events-none absolute left-1/2 top-1/2 z-[900] w-[min(88vw,22rem)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-background/95 p-5 text-center shadow-lg backdrop-blur-md">
+            <div className="mx-auto grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Info className="h-5 w-5"/></div>
+            <p className="mt-3 text-sm font-semibold text-foreground">പരാതികൾ കണ്ടെത്തിയില്ല</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">ഈ ഫിൽട്ടറുകൾക്ക് അനുയോജ്യമായ റിപ്പോർട്ടുകൾ ഇല്ല. ഫിൽട്ടറുകൾ മാറ്റി വീണ്ടും ശ്രമിക്കുക.</p>
+          </div>
+        )}
+
         {/* Map Container */}
         <MapContainer
           center={KERALA_CENTER}
@@ -289,10 +297,10 @@ export const IssueMap: React.FC = () => {
               icon={createCustomPin(point.severity, point.current_status)}
             >
               <Popup className="naam-popup" maxWidth={320} minWidth={260}>
-                <div className="p-1 space-y-2">
+              <div className="space-y-2 p-1 text-foreground">
                   {/* Thumbnail if present */}
                   {point.thumbnail_url && (
-                    <div className="h-32 w-full rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+                    <div className="h-32 w-full overflow-hidden rounded-lg border border-border bg-muted">
                       <img
                         src={point.thumbnail_url}
                         alt={point.title}
@@ -304,48 +312,48 @@ export const IssueMap: React.FC = () => {
 
                   {/* Header badges */}
                   <div className="flex items-center justify-between gap-1 flex-wrap">
-                    <span className="font-mono text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
+                    <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted-foreground">
                       {point.tracking_code}
                     </span>
                     <StatusBadge status={point.current_status as any} size="sm" />
                   </div>
 
                   {/* Title in Malayalam */}
-                  <h4 className="font-bold text-xs text-slate-900 leading-snug">{point.title}</h4>
+                  <h4 className="text-xs font-bold leading-snug text-foreground">{point.title}</h4>
 
                   {/* Category and Location meta */}
-                  <div className="text-[11px] text-slate-600 space-y-0.5">
+                  <div className="space-y-0.5 text-[11px] text-muted-foreground">
                     <div className="flex items-center space-x-1">
-                      <span className="font-semibold text-emerald-800">വിഭാഗം:</span>
+                      <span className="font-semibold text-primary">വിഭാഗം:</span>
                       <span>{point.category_display_ml}</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <span className="font-semibold text-slate-700">തദ്ദേശ സ്ഥാപനം:</span>
+                      <span className="font-semibold text-foreground">തദ്ദേശ സ്ഥാപനം:</span>
                       <span>{point.lsgd_name}</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <span className="font-semibold text-slate-700">ജില്ല:</span>
+                      <span className="font-semibold text-foreground">ജില്ല:</span>
                       <span>{point.district}</span>
                       {point.ward_number && <span>(വാർഡ് {point.ward_number})</span>}
                     </div>
                     {point.distance_km !== undefined && point.distance_km !== null && (
-                      <div className="text-[10px] font-bold text-blue-700">
+                      <div className="text-[10px] font-bold text-accent">
                         ദൂരം: {point.distance_km} കി.മീ (km)
                       </div>
                     )}
                   </div>
 
                   {/* Severity indicator */}
-                  <div className="pt-1 flex items-center justify-between border-t border-slate-100">
-                    <span className="text-[10px] font-semibold text-slate-500">
+                  <div className="flex items-center justify-between border-t border-border pt-1">
+                    <span className="text-[10px] font-semibold text-muted-foreground">
                       തീവ്രത:{' '}
                       <span
                         className={
                           point.severity === 'EMERGENCY'
-                            ? 'text-red-600 font-bold'
+                            ? 'text-critical font-bold'
                             : point.severity === 'HIGH'
-                            ? 'text-orange-600 font-bold'
-                            : 'text-slate-700'
+                            ? 'text-warning font-bold'
+                            : 'text-foreground'
                         }
                       >
                         {point.severity}
@@ -354,7 +362,7 @@ export const IssueMap: React.FC = () => {
 
                     <button
                       onClick={() => navigate(`/track/${point.tracking_code}`)}
-                      className="inline-flex items-center text-[11px] font-bold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
+                      className="inline-flex cursor-pointer items-center text-[11px] font-bold text-primary hover:underline"
                     >
                       വിശദാംശങ്ങൾ <ExternalLink className="w-3 h-3 ml-0.5" />
                     </button>
@@ -366,22 +374,22 @@ export const IssueMap: React.FC = () => {
         </MapContainer>
 
         {/* Bottom Legend */}
-        <div className="absolute bottom-4 right-4 z-[1000] bg-white/95 backdrop-blur-sm p-2.5 rounded-xl border border-slate-200 shadow-md text-[10px] space-y-1 text-slate-700 hidden sm:block">
-          <div className="font-bold text-slate-800 border-b border-slate-100 pb-1">തീവ്രതാ സൂചിക (Legend)</div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-600 inline-block animate-pulse"></span>
+        <div className="absolute bottom-3 left-3 right-3 z-[1000] flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-border bg-background/95 p-2.5 text-[9px] text-foreground shadow-md backdrop-blur-sm sm:bottom-4 sm:left-auto sm:right-4 sm:block sm:space-y-1 sm:text-[10px]">
+          <div className="font-bold text-foreground sm:border-b sm:border-border sm:pb-1">തീവ്രതാ സൂചിക (Legend)</div>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-critical"></span>
             <span>അടിയന്തിരം (Emergency)</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block"></span>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-warning"></span>
             <span>ഉയർന്നത് (High)</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-warning/70"></span>
             <span>സാധാരണം (Medium)</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-primary"></span>
             <span>പരിഹരിച്ചത് (Resolved)</span>
           </div>
         </div>
