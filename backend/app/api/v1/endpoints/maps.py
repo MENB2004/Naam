@@ -2,14 +2,80 @@ import math
 import uuid
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status as http_status
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 from app.core.database import get_db
 from app.models.complaint import Complaint, Evidence
 from app.models.location import Location
+from app.models.department import Department
 from app.schemas.complaint import CATEGORY_ML_MAP, STATUS_ML_MAP, KERALA_MIN_LAT, KERALA_MAX_LAT, KERALA_MIN_LON, KERALA_MAX_LON
-from app.schemas.map import MapPoint, MapClustersResponse, GeoJsonFeature, GeoJsonFeatureCollection
+from app.schemas.map import MapPoint, MapClustersResponse, GeoJsonFeature, GeoJsonFeatureCollection, PublicMapSummary
 
 router = APIRouter()
+
+
+@router.get("/summary", response_model=PublicMapSummary)
+def get_public_map_summary(db: Session = Depends(get_db)):
+    """Return aggregate metrics and sanitized recent reports visible on the public map."""
+    public_reports = (
+        db.query(Complaint)
+        .join(Complaint.location)
+        .filter(
+            Complaint.is_public.is_(True),
+            Location.latitude >= KERALA_MIN_LAT,
+            Location.latitude <= KERALA_MAX_LAT,
+            Location.longitude >= KERALA_MIN_LON,
+            Location.longitude <= KERALA_MAX_LON,
+        )
+    )
+    total = public_reports.count()
+    active = public_reports.filter(Complaint.current_status.notin_(["RESOLVED", "REJECTED"])).count()
+    resolved = public_reports.filter(Complaint.current_status == "RESOLVED").count()
+    category_counts = (
+        db.query(Complaint.category, func.count(Complaint.id))
+        .join(Complaint.location)
+        .filter(
+            Complaint.is_public.is_(True),
+            Location.latitude >= KERALA_MIN_LAT,
+            Location.latitude <= KERALA_MAX_LAT,
+            Location.longitude >= KERALA_MIN_LON,
+            Location.longitude <= KERALA_MAX_LON,
+        )
+        .group_by(Complaint.category)
+        .all()
+    )
+    latest = (
+        db.query(Complaint, Location.district)
+        .join(Complaint.location)
+        .filter(
+            Complaint.is_public.is_(True),
+            Location.latitude >= KERALA_MIN_LAT,
+            Location.latitude <= KERALA_MAX_LAT,
+            Location.longitude >= KERALA_MIN_LON,
+            Location.longitude <= KERALA_MAX_LON,
+        )
+        .order_by(Complaint.created_at.desc())
+        .limit(5)
+        .all()
+    )
+    return {
+        "total_complaints": total,
+        "active_complaints": active,
+        "resolved_complaints": resolved,
+        "active_departments": db.query(Department).filter(Department.is_active.is_(True)).count(),
+        "categories": [{"category": category, "count": count} for category, count in category_counts],
+        "recent_reports": [
+            {
+                "id": complaint.id,
+                "title": complaint.title,
+                "category": complaint.category,
+                "current_status": complaint.current_status,
+                "district": district,
+                "created_at": complaint.created_at,
+            }
+            for complaint, district in latest
+        ],
+    }
 
 
 def haversine_distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

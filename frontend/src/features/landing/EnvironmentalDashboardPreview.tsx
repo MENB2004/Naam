@@ -1,64 +1,123 @@
-import {
-  Activity, AlertTriangle, Bell, Building2, Check, ChevronDown, CircleHelp,
-  Droplets, FileText, LayoutDashboard, Map, Search, ShieldCheck,
-  Sprout, Waves, Wind, UserRound, Users, Recycle,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Activity, AlertTriangle, Building2, Check, FileText, RefreshCw } from 'lucide-react';
+import { publicSummaryService } from '../../services/publicSummaryService';
+import type { PublicMapSummary } from '../../types/publicSummary';
 
-const stats = [
-  { label: 'Reported issues', value: '128', icon: FileText, tone: 'text-primary bg-primary/10' },
-  { label: 'Resolved issues', value: '86', icon: Check, tone: 'text-secondary bg-secondary/10' },
-  { label: 'Pending complaints', value: '42', icon: AlertTriangle, tone: 'text-brand-amber bg-brand-amber/10' },
-  { label: 'Active departments', value: '6', icon: Building2, tone: 'text-accent bg-accent/10' },
-];
+const CATEGORY_NAMES: Record<string, { en: string; ml: string }> = {
+  WASTE: { en: 'Waste management', ml: 'മാലിന്യ നിയന്ത്രണം' },
+  WATER_POLLUTION: { en: 'Water pollution', ml: 'ജല മലിനീകരണം' },
+  DRAINAGE: { en: 'Drainage and sewage', ml: 'ഓടയും മലിനജലവും' },
+  FLOODING: { en: 'Flooding', ml: 'വെള്ളപ്പൊക്കം / വെള്ളക്കെട്ട്' },
+  AIR_POLLUTION: { en: 'Air pollution', ml: 'വായു മലിനീകരണം' },
+  DEFORESTATION: { en: 'Forest and wetland loss', ml: 'വന-തണ്ണീർത്തട നാശം' },
+  ILLEGAL_MINING: { en: 'Illegal mining', ml: 'അനധികൃത ഖനനം' },
+  OTHER: { en: 'Other issues', ml: 'മറ്റ് പ്രശ്നങ്ങൾ' },
+};
 
-const records = [
-  ['Nov 18', 'Waste accumulation', 'Sample Location A', 'Municipality', 'Pending', 'bg-brand-amber/10 text-brand-amber'],
-  ['Nov 16', 'Water pollution', 'Sample Location B', 'Water Authority', 'Under review', 'bg-accent/10 text-accent'],
-  ['Nov 14', 'Blocked drainage', 'Sample Location C', 'Municipality', 'In progress', 'bg-secondary/10 text-secondary'],
-  ['Nov 12', 'Flooding report', 'Sample Location D', 'Disaster Management', 'Resolved', 'bg-primary/10 text-primary'],
-];
-
-const workspaceItems: Array<[LucideIcon, string]> = [
-  [LayoutDashboard, 'Overview'], [FileText, 'Complaints'], [Map, 'Environmental map'],
-  [Waves, 'Water monitoring'], [Recycle, 'Waste management'], [Building2, 'Departments'],
-];
-const monitoringItems: Array<[LucideIcon, string]> = [
-  [Droplets, 'Water quality'], [Activity, 'Pollution reports'], [Users, 'Field inspections'], [AlertTriangle, 'Alerts'],
-];
-
-function TrendChart() {
-  return <svg viewBox="0 0 520 110" className="h-24 w-full" role="img" aria-label="Illustrative thirty-day environmental report trends">
-    <defs><linearGradient id="area" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="hsl(var(--primary))" stopOpacity=".22"/><stop offset="1" stopColor="hsl(var(--primary))" stopOpacity="0"/></linearGradient></defs>
-    {[25, 55, 85].map(y => <path key={y} d={`M0 ${y}H520`} stroke="hsl(var(--border))" strokeDasharray="3 5"/>)}
-    <path d="M0 79 C38 65 43 74 80 60 S124 66 160 48 S213 58 250 41 S300 48 338 34 S391 46 425 27 S479 37 520 15 V110 H0Z" fill="url(#area)"/>
-    <path d="M0 79 C38 65 43 74 80 60 S124 66 160 48 S213 58 250 41 S300 48 338 34 S391 46 425 27 S479 37 520 15" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round"/>
-    <path d="M0 94 C38 89 45 94 80 82 S126 87 160 75 S215 82 250 65 S300 72 338 62 S391 71 425 56 S478 64 520 48" fill="none" stroke="hsl(var(--accent))" strokeWidth="2" strokeLinecap="round"/>
-  </svg>;
-}
+const STATUS_NAMES: Record<string, { en: string; ml: string }> = {
+  SUBMITTED: { en: 'Submitted', ml: 'സമർപ്പിച്ചു' },
+  VERIFIED: { en: 'Verified', ml: 'പരിശോധിച്ചു' },
+  ASSIGNED: { en: 'Assigned', ml: 'ചുമതലപ്പെടുത്തി' },
+  IN_PROGRESS: { en: 'In progress', ml: 'നടപടിയിൽ' },
+  ACTION_TAKEN: { en: 'Action taken', ml: 'നടപടി സ്വീകരിച്ചു' },
+  RESOLVED: { en: 'Resolved', ml: 'പരിഹരിച്ചു' },
+  REJECTED: { en: 'Closed', ml: 'അടച്ചു' },
+  APPEALED: { en: 'Appealed', ml: 'അപ്പീൽ നൽകി' },
+};
 
 export function EnvironmentalDashboardPreview() {
-  return <div aria-label="Illustrative NAAM monitoring dashboard preview" className="dashboard-preview select-none">
-    <div className="flex h-12 items-center justify-between border-b border-border/70 px-4 md:px-5">
-      <div className="flex items-center gap-2 text-xs font-semibold text-foreground"><span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-white"><Sprout size={15}/></span><span>NAAM <span className="ml-1 font-malayalam text-muted-foreground">നാം</span></span><ChevronDown size={13} className="text-muted-foreground"/></div>
-      <div className="hidden w-[42%] items-center gap-2 rounded-lg border border-border bg-white/70 px-3 py-1.5 text-[10px] text-muted-foreground sm:flex"><Search size={13}/>Search complaints, locations...<span className="ml-auto rounded border border-border px-1.5">⌘K</span></div>
-      <div className="flex items-center gap-2"><span className="hidden rounded-full bg-primary px-3 py-1.5 text-[10px] font-medium text-white sm:inline-flex">Report issue</span><Bell size={15} className="text-muted-foreground"/><span className="grid h-7 w-7 place-items-center rounded-full bg-secondary/15 text-secondary"><UserRound size={14}/></span></div>
-    </div>
-    <div className="flex">
-      <aside className="hidden w-40 shrink-0 border-r border-border/70 bg-secondary/10 p-3 md:block">
-        <p className="mb-2 px-2 text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">Workspace</p>
-        {workspaceItems.map(([Icon,label],i) => <div key={label} className={`mb-1 flex items-center gap-2 rounded-md px-2 py-1.5 text-[10px] ${i===0?'bg-white font-semibold text-primary shadow-sm':'text-muted-foreground'}`}><Icon size={12}/>{label}{i===1&&<span className="ml-auto rounded-full bg-primary/10 px-1.5 text-[9px] text-primary">10</span>}</div>)}
-        <p className="mb-2 mt-5 px-2 text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">Monitoring</p>
-        {monitoringItems.map(([Icon,label])=><div key={label} className="mb-1 flex items-center gap-2 rounded-md px-2 py-1.5 text-[10px] text-muted-foreground"><Icon size={12}/>{label}</div>)}
-      </aside>
-      <main className="min-w-0 flex-1 p-3 md:p-4">
-        <div className="mb-3 flex flex-wrap items-end justify-between gap-2"><div><p className="text-[9px] uppercase tracking-wider text-muted-foreground">Demonstration data · not live</p><h3 className="text-sm font-semibold text-foreground md:text-base">Welcome to NAAM</h3><p className="text-[10px] text-muted-foreground">Environmental monitoring overview</p></div><div className="flex gap-1.5"><span className="rounded-md bg-primary px-2.5 py-1.5 text-[9px] font-medium text-white">Report issue</span><span className="hidden rounded-md border border-border bg-white px-2.5 py-1.5 text-[9px] text-foreground sm:inline-flex">View map</span><span className="hidden rounded-md border border-border bg-white px-2.5 py-1.5 text-[9px] text-foreground lg:inline-flex">Water quality</span></div></div>
-        <div className="mb-3 grid grid-cols-2 gap-2 lg:grid-cols-4">{stats.map(({label,value,icon:Icon,tone})=><div key={label} className="rounded-lg border border-border/80 bg-white/85 p-2.5 md:p-3"><div className="flex items-center justify-between"><span className="text-[9px] text-muted-foreground">{label}</span><span className={`grid h-6 w-6 place-items-center rounded-md ${tone}`}><Icon size={12}/></span></div><p className="mt-1 text-base font-semibold text-foreground">{value}</p></div>)}</div>
-        <div className="mb-3 grid gap-2 lg:grid-cols-[1.05fr_1fr]"><section className="rounded-lg border border-border/80 bg-white/85 p-3"><div className="mb-2 flex items-start justify-between"><div><h4 className="text-[11px] font-semibold text-foreground">Water quality monitoring</h4><p className="text-[9px] text-muted-foreground">Sample values · illustrative only</p></div><Droplets size={15} className="text-accent"/></div><div className="grid grid-cols-4 gap-1 text-center"><div><b className="text-xs text-primary">78</b><p className="text-[8px] text-muted-foreground">Quality index</p></div><div><b className="text-xs text-foreground">7.2</b><p className="text-[8px] text-muted-foreground">pH</p></div><div><b className="text-xs text-foreground">2.1</b><p className="text-[8px] text-muted-foreground">Turbidity</p></div><div><b className="text-xs text-foreground">6.8</b><p className="text-[8px] text-muted-foreground">Dissolved oxygen</p></div></div><div className="mt-1"><TrendChart/></div><p className="text-right text-[8px] text-muted-foreground">Demo readings · last updated just now</p></section>
-          <section className="rounded-lg border border-border/80 bg-white/85 p-3"><div className="mb-2 flex items-center justify-between"><div><h4 className="text-[11px] font-semibold text-foreground">Environmental reports</h4><p className="text-[9px] text-muted-foreground">Illustrative 30-day trend</p></div><Wind size={15} className="text-secondary"/></div><TrendChart/><div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[8px] text-muted-foreground"><span>● Waste management</span><span className="text-accent">● Water pollution</span><span className="text-brand-amber">● Drainage</span><span className="text-secondary">● Flood reports</span></div></section></div>
-        <section className="overflow-hidden rounded-lg border border-border/80 bg-white/90"><div className="flex items-center justify-between border-b border-border/70 px-3 py-2"><div><h4 className="text-[11px] font-semibold text-foreground">Recent environmental reports</h4><p className="text-[8px] text-muted-foreground">Fictional sample records</p></div><ShieldCheck size={14} className="text-primary"/></div><div className="grid grid-cols-[1.2fr_1.1fr_auto] gap-2 bg-muted/70 px-3 py-1.5 text-[8px] font-medium text-muted-foreground sm:grid-cols-[.7fr_1.3fr_1.2fr_1fr_auto]"><span className="hidden sm:block">Date</span><span>Issue</span><span>Location</span><span className="hidden sm:block">Department</span><span>Status</span></div>{records.map(([date,issue,location,department,status,tone])=><div key={issue} className="grid grid-cols-[1.2fr_1.1fr_auto] gap-2 border-t border-border/50 px-3 py-1.5 text-[8px] text-foreground sm:grid-cols-[.7fr_1.3fr_1.2fr_1fr_auto]"><span className="hidden text-muted-foreground sm:block">{date}</span><span className="truncate">{issue}</span><span className="truncate text-muted-foreground">{location}</span><span className="hidden truncate text-muted-foreground sm:block">{department}</span><span className={`rounded-full px-1.5 py-0.5 ${tone}`}>{status}</span></div>)}</section>
-      </main>
-    </div>
-    <div className="flex items-center gap-3 border-t border-border/70 px-4 py-2 text-[9px] text-muted-foreground md:hidden"><CircleHelp size={12}/> Demo preview · monitoring tools</div>
-  </div>;
+  const { i18n } = useTranslation();
+  const isMalayalam = i18n.resolvedLanguage?.startsWith('ml') ?? true;
+  const [summary, setSummary] = useState<PublicMapSummary | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+
+  const loadSummary = useCallback(async () => {
+    try {
+      const nextSummary = await publicSummaryService.getSummary();
+      setSummary(nextSummary);
+      setHasError(false);
+      setUpdatedAt(new Date());
+    } catch {
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadSummary();
+    const interval = window.setInterval(() => void loadSummary(), 60_000);
+    const refreshOnFocus = () => void loadSummary();
+    window.addEventListener('focus', refreshOnFocus);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('focus', refreshOnFocus);
+    };
+  }, [loadSummary]);
+
+  const number = new Intl.NumberFormat(isMalayalam ? 'ml-IN' : 'en-IN');
+  const dateTime = updatedAt ? new Intl.DateTimeFormat(isMalayalam ? 'ml-IN' : 'en-IN', { hour: 'numeric', minute: '2-digit' }).format(updatedAt) : '';
+  const cards = [
+    { label: isMalayalam ? 'ആകെ പൊതുപരാതികൾ' : 'Public reports', value: summary?.total_complaints, icon: FileText, tone: 'text-primary bg-primary/10' },
+    { label: isMalayalam ? 'പരിഹരിച്ചത്' : 'Resolved', value: summary?.resolved_complaints, icon: Check, tone: 'text-secondary bg-secondary/10' },
+    { label: isMalayalam ? 'നടപടി പുരോഗമിക്കുന്നത്' : 'Active cases', value: summary?.active_complaints, icon: AlertTriangle, tone: 'text-warning bg-warning/10' },
+    { label: isMalayalam ? 'സജീവ വകുപ്പുകൾ' : 'Active departments', value: summary?.active_departments, icon: Building2, tone: 'text-accent bg-accent/10' },
+  ];
+  const maxCategoryCount = Math.max(1, ...(summary?.categories.map((category) => category.count) ?? []));
+
+  return (
+    <section aria-label={isMalayalam ? 'NAAM തത്സമയ പൊതുഡാഷ്ബോർഡ്' : 'NAAM live public dashboard'} className="dashboard-preview overflow-hidden rounded-xl bg-background text-foreground">
+      <div className="flex items-center justify-between gap-3 border-b border-border/70 px-3 py-3 md:px-5">
+        <div className="flex items-center gap-2 text-xs font-semibold"><span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-white"><Activity size={15}/></span><span>NAAM <span className="ml-1 ml-body text-muted-foreground">നാം</span></span></div>
+        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+          <span className={`h-2 w-2 rounded-full ${hasError ? 'bg-warning' : summary ? 'bg-primary' : 'bg-muted-foreground'}`} />
+          <span>{hasError ? (isMalayalam ? 'അപ്‌ഡേറ്റ് ലഭ്യമല്ല' : 'Update unavailable') : (isMalayalam ? 'തത്സമയ പൊതുവിവരങ്ങൾ' : 'Live public data')}</span>
+          <button type="button" onClick={() => void loadSummary()} aria-label={isMalayalam ? 'വിവരങ്ങൾ പുതുക്കുക' : 'Refresh data'} className="ml-1 rounded-md p-1.5 transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><RefreshCw size={13} className={isLoading ? 'animate-spin' : ''}/></button>
+        </div>
+      </div>
+
+      <div className="p-3 md:p-5">
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+          <div><p className="text-[10px] font-medium text-primary">{isMalayalam ? 'പൊതുവായി പങ്കിട്ട പരാതികളുടെ സംഗ്രഹം' : 'Summary of publicly shared reports'}</p><h3 className="ml-display mt-1 text-base font-bold md:text-lg">{isMalayalam ? 'കേരള പരിസ്ഥിതി റിപ്പോർട്ടുകൾ' : 'Kerala environmental reports'}</h3></div>
+          <span className="text-[9px] text-muted-foreground">{dateTime ? `${isMalayalam ? 'അപ്‌ഡേറ്റ്' : 'Updated'} ${dateTime}` : isMalayalam ? 'വിവരം ലോഡ് ചെയ്യുന്നു' : 'Loading data'}</span>
+        </div>
+
+        <div className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
+          {cards.map(({ label, value, icon: Icon, tone }) => (
+            <div key={label} className="rounded-lg border border-border/80 bg-background p-2.5 md:p-3">
+              <div className="flex items-start justify-between gap-1"><span className="text-[10px] leading-relaxed text-muted-foreground">{label}</span><span className={`grid h-6 w-6 shrink-0 place-items-center rounded-md ${tone}`}><Icon size={12}/></span></div>
+              <p className="mt-1 text-lg font-semibold tabular-nums">{value === undefined ? isLoading ? <span className="inline-block h-5 w-10 animate-pulse rounded bg-muted align-middle" aria-label="Loading"/> : '—' : number.format(value)}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid gap-3 lg:grid-cols-[.8fr_1.2fr]">
+          <section className="rounded-lg border border-border/80 bg-background p-3" aria-labelledby="category-summary-title">
+            <h4 id="category-summary-title" className="text-xs font-semibold">{isMalayalam ? 'വിഭാഗം തിരിച്ചുള്ള പരാതികൾ' : 'Reports by category'}</h4>
+            <p className="mb-3 mt-0.5 text-[9px] text-muted-foreground">{isMalayalam ? 'പൊതുവായി പങ്കിട്ട പരാതികൾ മാത്രം' : 'Public reports only'}</p>
+            {isLoading && !summary ? <div className="space-y-3">{[1, 2, 3].map((item) => <div key={item} className="h-5 animate-pulse rounded bg-muted"/>)}</div> : summary?.categories.length ? <ul className="space-y-2">
+              {[...summary.categories].sort((a, b) => b.count - a.count).map(({ category, count }) => <li key={category} className="text-[10px]">
+                <div className="mb-1 flex items-center justify-between gap-2"><span className="truncate">{CATEGORY_NAMES[category]?.[isMalayalam ? 'ml' : 'en'] ?? category}</span><span className="tabular-nums text-muted-foreground">{number.format(count)}</span></div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${Math.max(3, count / maxCategoryCount * 100)}%` }}/></div>
+              </li>)}
+            </ul> : <p className="rounded-lg bg-muted/50 p-3 text-[10px] leading-relaxed text-muted-foreground">{hasError ? (isMalayalam ? 'സംഗ്രഹം ലഭ്യമല്ല. വീണ്ടും ശ്രമിക്കുക.' : 'Summary unavailable. Please try again.') : (isMalayalam ? 'ഇതുവരെ പൊതുപരാതികളൊന്നുമില്ല.' : 'No public reports yet.')}</p>}
+          </section>
+
+          <section className="overflow-hidden rounded-lg border border-border/80 bg-background" aria-labelledby="recent-reports-title">
+            <div className="flex items-center justify-between border-b border-border/70 px-3 py-2"><div><h4 id="recent-reports-title" className="text-xs font-semibold">{isMalayalam ? 'പുതിയ റിപ്പോർട്ടുകൾ' : 'Recent reports'}</h4><p className="text-[9px] text-muted-foreground">{isMalayalam ? 'പേര് അല്ലെങ്കിൽ ബന്ധപ്പെടാനുള്ള വിവരങ്ങൾ കാണിക്കില്ല' : 'Names and contact details are not shown'}</p></div><FileText size={14} className="text-primary"/></div>
+            {isLoading && !summary ? <div className="space-y-2 p-3">{[1, 2, 3].map((item) => <div key={item} className="h-8 animate-pulse rounded bg-muted"/>)}</div> : summary?.recent_reports.length ? <ul className="divide-y divide-border/70">
+              {summary.recent_reports.map((report) => <li key={report.id} className="flex min-w-0 items-center justify-between gap-3 px-3 py-2 text-[10px]">
+                <div className="min-w-0"><p className="truncate font-medium">{report.title}</p><p className="mt-0.5 truncate text-muted-foreground">{CATEGORY_NAMES[report.category]?.[isMalayalam ? 'ml' : 'en'] ?? report.category} · {report.district}</p></div>
+                <span className="shrink-0 rounded-full bg-muted px-2 py-1 text-[9px] text-muted-foreground">{STATUS_NAMES[report.current_status]?.[isMalayalam ? 'ml' : 'en'] ?? report.current_status}</span>
+              </li>)}
+            </ul> : <p className="p-4 text-[10px] text-muted-foreground">{hasError ? (isMalayalam ? 'റിപ്പോർട്ടുകൾ ലോഡ് ചെയ്യാനായില്ല.' : 'Could not load reports.') : (isMalayalam ? 'പുതിയ പൊതുറിപ്പോർട്ടുകളില്ല.' : 'No recent public reports.')}</p>}
+          </section>
+        </div>
+        {hasError && summary && <p role="status" className="mt-3 text-right text-[9px] text-warning">{isMalayalam ? 'പുതിയ വിവരം ലഭ്യമല്ല; അവസാനമായി ലഭിച്ച വിവരം കാണിക്കുന്നു.' : 'Latest update unavailable; showing the last available data.'}</p>}
+      </div>
+    </section>
+  );
 }

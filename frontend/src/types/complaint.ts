@@ -2,6 +2,7 @@ export type ComplaintCategory =
   | 'WASTE'
   | 'WATER_POLLUTION'
   | 'DRAINAGE'
+  | 'FLOODING'
   | 'AIR_POLLUTION'
   | 'DEFORESTATION'
   | 'ILLEGAL_MINING'

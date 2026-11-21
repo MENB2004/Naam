@@ -42,3 +42,26 @@ class MapClustersResponse(BaseModel):
     total_count: int
     points: List[MapPoint]
     geojson: GeoJsonFeatureCollection
+
+
+class PublicCategoryCount(BaseModel):
+    category: str
+    count: int
+
+
+class PublicRecentReport(BaseModel):
+    id: uuid.UUID
+    title: str
+    category: str
+    current_status: str
+    district: str
+    created_at: datetime
+
+
+class PublicMapSummary(BaseModel):
+    total_complaints: int
+    active_complaints: int
+    resolved_complaints: int
+    active_departments: int
+    categories: List[PublicCategoryCount]
+    recent_reports: List[PublicRecentReport]

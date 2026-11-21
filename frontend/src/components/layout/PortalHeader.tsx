@@ -55,6 +55,14 @@ export function PortalHeader({
             {currentLang === 'ml' ? 'ലൈവ് മാപ്പ്' : 'Live Map'}
           </Link>
           <Link
+            to="/analytics"
+            className={`transition-colors hover:text-primary ${
+              location.pathname === '/analytics' ? 'text-primary font-semibold' : ''
+            }`}
+          >
+            {currentLang === 'ml' ? 'അനലിറ്റിക്സ്' : 'Analytics'}
+          </Link>
+          <Link
             to="/design-system"
             className={`transition-colors hover:text-primary ${
               location.pathname === '/design-system' ? 'text-primary font-semibold' : ''

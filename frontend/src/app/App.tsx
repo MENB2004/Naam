@@ -17,6 +17,7 @@ import { OfficerTaskList } from '../features/field-officer/OfficerTaskList';
 import { IssueMap } from '../features/maps/IssueMap';
 import { AlertBanner } from '../features/alerts/AlertBanner';
 import { AdminDashboard } from '../features/admin/AdminDashboard';
+import { AnalyticsDashboard } from '../features/analytics/AnalyticsDashboard';
 import { useAuthStore } from '../store/authStore';
 import { Logo } from '../components/common/Logo';
 import { Button } from '../components/ui/button';
@@ -175,6 +176,7 @@ export default function App() {
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/map" element={<IssueMap />} />
+        <Route path="/analytics" element={<AnalyticsDashboard />} />
         <Route path="/design-system" element={<DesignShowcase />} />
 
         {/* Auth Routes */}

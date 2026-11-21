@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import {
   Trash2,
   Droplets,
   Waves,
+  CloudRain,
   Wind,
   TreePine,
   Mountain,
@@ -65,6 +66,15 @@ const CATEGORIES: CategoryOption[] = [
     bgColor: 'bg-teal-50',
   },
   {
+    key: 'FLOODING',
+    titleMl: 'വെള്ളപ്പൊക്കം / വെള്ളക്കെട്ട്',
+    titleEn: 'Flooding & Waterlogging',
+    descMl: 'മഴവെള്ളക്കെട്ട്, വെള്ളപ്പൊക്കം, വെള്ളം ഒഴുകിപ്പോകാത്ത സാഹചര്യം.',
+    icon: CloudRain,
+    color: '#2563EB',
+    bgColor: 'bg-blue-50',
+  },
+  {
     key: 'AIR_POLLUTION',
     titleMl: 'വായു മലിനീകരണം',
     titleEn: 'Air Pollution',
@@ -104,12 +114,17 @@ const CATEGORIES: CategoryOption[] = [
 
 export const ComplaintWizard: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category');
+  const initialCategory = CATEGORIES.some((option) => option.key === categoryParam)
+    ? categoryParam as ComplaintCategory
+    : 'WASTE';
 
   // Multi-step state (1: Category, 2: Details & Evidence, 3: Location, 4: Success)
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   // Form State
-  const [category, setCategory] = useState<ComplaintCategory>('WASTE');
+  const [category, setCategory] = useState<ComplaintCategory>(initialCategory);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [severity, setSeverity] = useState<ComplaintSeverity>('MEDIUM');

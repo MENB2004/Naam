@@ -13,6 +13,7 @@ CATEGORY_ML_MAP = {
     "WASTE": "മാലിന്യ നിക്ഷേപം",
     "WATER_POLLUTION": "ജല മലിനീകരണം",
     "DRAINAGE": "ഡ്രെയിനേജ് തടസ്സം",
+    "FLOODING": "വെള്ളപ്പൊക്കം / വെള്ളക്കെട്ട്",
     "AIR_POLLUTION": "വായു മലിനീകരണം",
     "DEFORESTATION": "വനനശീകരണം / കണ്ടൽ നശീകരണം",
     "ILLEGAL_MINING": "അനധികൃത ഖനനം",
