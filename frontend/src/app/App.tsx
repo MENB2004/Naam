@@ -15,6 +15,10 @@ import { DesignShowcase } from '../features/showcase/DesignShowcase';
 import { LoginForm } from '../features/auth/LoginForm';
 import { RegisterForm } from '../features/auth/RegisterForm';
 import { ProtectedRoute } from '../components/common/ProtectedRoute';
+import { CitizenDashboard } from '../features/community/CitizenDashboard';
+import { ComplaintWizard } from '../features/community/ComplaintWizard';
+import { MyReports } from '../features/community/MyReports';
+import { ComplaintTracker } from '../features/complaints/ComplaintTracker';
 import { useAuthStore } from '../store/authStore';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -364,18 +368,32 @@ export default function App() {
         <Route path="/login/admin" element={<LoginForm portal="admin" />} />
         <Route path="/register" element={<RegisterForm />} />
 
-        {/* Protected Portals */}
+        {/* Tracking Routes */}
+        <Route path="/track" element={<ComplaintTracker />} />
+        <Route path="/track/:trackingCode" element={<ComplaintTracker />} />
+
+        {/* Protected Community Portal */}
         <Route
           path="/community"
           element={
             <ProtectedRoute allowedRoles={['COMMUNITY']}>
-              <PortalDashboardView
-                titleMl="പൗര പോർട്ടൽ"
-                titleEn="Community Portal"
-                roleLabel="പൗരൻ"
-                color="#087C63"
-                nextPhaseText="ഫേസ് 05-ൽ പരിസ്ഥിതി പരാതികൾ സമർപ്പിക്കാനും നടപടികൾ തത്സമയം ട്രാക്ക് ചെയ്യാനും സാധിക്കും."
-              />
+              <CitizenDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/community/report"
+          element={
+            <ProtectedRoute allowedRoles={['COMMUNITY']}>
+              <ComplaintWizard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/community/my-reports"
+          element={
+            <ProtectedRoute allowedRoles={['COMMUNITY']}>
+              <MyReports />
             </ProtectedRoute>
           }
         />

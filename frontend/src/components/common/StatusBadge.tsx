@@ -15,10 +15,12 @@ export type ComplaintStatus =
   | 'UNDER_REVIEW' 
   | 'ASSIGNED' 
   | 'IN_PROGRESS' 
+  | 'ACTION_TAKEN'
   | 'RESOLVED' 
   | 'VERIFIED' 
   | 'REJECTED' 
-  | 'REOPENED';
+  | 'REOPENED'
+  | 'APPEALED';
 
 interface StatusConfig {
   labelMl: string;
@@ -62,6 +64,14 @@ const STATUS_CONFIGS: Record<ComplaintStatus, StatusConfig> = {
     borderClass: 'border-orange-200',
     icon: PlayCircle,
   },
+  ACTION_TAKEN: {
+    labelMl: 'നടപടി സ്വീകരിച്ചു',
+    labelEn: 'Action Taken',
+    bgClass: 'bg-emerald-50',
+    textClass: 'text-emerald-800',
+    borderClass: 'border-emerald-200',
+    icon: CheckCircle,
+  },
   RESOLVED: {
     labelMl: 'പരിഹരിച്ചു',
     labelEn: 'Resolved',
@@ -92,6 +102,14 @@ const STATUS_CONFIGS: Record<ComplaintStatus, StatusConfig> = {
     bgClass: 'bg-rose-50',
     textClass: 'text-rose-700',
     borderClass: 'border-rose-200',
+    icon: RotateCcw,
+  },
+  APPEALED: {
+    labelMl: 'അപ്പീൽ നൽകി',
+    labelEn: 'Appealed',
+    bgClass: 'bg-amber-50',
+    textClass: 'text-amber-800',
+    borderClass: 'border-amber-200',
     icon: RotateCcw,
   },
 };

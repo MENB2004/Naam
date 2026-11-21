@@ -1,0 +1,129 @@
+import uuid
+from datetime import datetime
+from typing import List, Optional
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+# Kerala Geographic Coordinate Bounds
+KERALA_MIN_LAT = 8.0
+KERALA_MAX_LAT = 13.0
+KERALA_MIN_LON = 74.5
+KERALA_MAX_LON = 77.8
+
+CATEGORY_ML_MAP = {
+    "WASTE": "മാലിന്യ നിക്ഷേപം",
+    "WATER_POLLUTION": "ജല മലിനീകരണം",
+    "DRAINAGE": "ഡ്രെയിനേജ് തടസ്സം",
+    "AIR_POLLUTION": "വായു മലിനീകരണം",
+    "DEFORESTATION": "വനനശീകരണം / കണ്ടൽ നശീകരണം",
+    "ILLEGAL_MINING": "അനധികൃത ഖനനം",
+    "OTHER": "മറ്റ് പരിസ്ഥിതി പ്രശ്നങ്ങൾ",
+}
+
+STATUS_ML_MAP = {
+    "SUBMITTED": "സമർപ്പിച്ചു",
+    "VERIFIED": "പരിശോധിച്ചു",
+    "ASSIGNED": "ചുമതലപ്പെടുത്തി",
+    "IN_PROGRESS": "നടപടിയിൽ",
+    "ACTION_TAKEN": "നടപടി സ്വീകരിച്ചു",
+    "RESOLVED": "പരിഹരിച്ചു",
+    "REJECTED": "നിരസിച്ചു",
+    "APPEALED": "അപ്പീൽ നൽകി",
+}
+
+
+class LocationCreate(BaseModel):
+    latitude: float = Field(..., description="Latitude in decimal degrees")
+    longitude: float = Field(..., description="Longitude in decimal degrees")
+    district: str = Field(..., max_length=100)
+    lsgd_type: str = Field(default="GRAMA_PANCHAYAT", max_length=50)
+    lsgd_name: str = Field(..., max_length=150)
+    ward_number: Optional[str] = Field(None, max_length=10)
+    landmark: Optional[str] = None
+
+    @field_validator("latitude")
+    @classmethod
+    def validate_latitude(cls, v: float) -> float:
+        if not (KERALA_MIN_LAT <= v <= KERALA_MAX_LAT):
+            raise ValueError("ദയവായി കേരളത്തിനകത്തുള്ള സ്ഥലം തിരഞ്ഞെടുക്കുക (Latitude out of Kerala bounds)")
+        return v
+
+    @field_validator("longitude")
+    @classmethod
+    def validate_longitude(cls, v: float) -> float:
+        if not (KERALA_MIN_LON <= v <= KERALA_MAX_LON):
+            raise ValueError("ദയവായി കേരളത്തിനകത്തുള്ള സ്ഥലം തിരഞ്ഞെടുക്കുക (Longitude out of Kerala bounds)")
+        return v
+
+
+class LocationOut(BaseModel):
+    id: uuid.UUID
+    latitude: float
+    longitude: float
+    district: str
+    lsgd_type: str
+    lsgd_name: str
+    ward_number: Optional[str] = None
+    landmark: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class EvidenceCreate(BaseModel):
+    file_url: str
+    file_type: str = "image/jpeg"
+    file_size_bytes: int = 1024
+    evidence_type: str = "CITIZEN_SUBMISSION"
+
+
+class EvidenceOut(BaseModel):
+    id: uuid.UUID
+    file_url: str
+    file_type: str
+    file_size_bytes: int
+    evidence_type: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ComplaintUpdateOut(BaseModel):
+    id: uuid.UUID
+    previous_status: str
+    new_status: str
+    remarks: Optional[str] = None
+    created_at: datetime
+    author_name: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ComplaintCreate(BaseModel):
+    title: str = Field(..., min_length=5, max_length=255)
+    description: str = Field(..., min_length=10)
+    category: str = Field(default="WASTE")
+    severity: str = Field(default="MEDIUM")
+    location: LocationCreate
+    evidence: Optional[List[EvidenceCreate]] = []
+
+
+class ComplaintOut(BaseModel):
+    id: uuid.UUID
+    tracking_code: str
+    title: str
+    description: str
+    category: str
+    category_display_ml: str
+    severity: str
+    current_status: str
+    status_display_ml: str
+    reporter_id: uuid.UUID
+    reporter_name: Optional[str] = None
+    department_id: Optional[uuid.UUID] = None
+    department_name_ml: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    location: LocationOut
+    evidence: List[EvidenceOut] = []
+    updates: List[ComplaintUpdateOut] = []
+
+    model_config = ConfigDict(from_attributes=True)
