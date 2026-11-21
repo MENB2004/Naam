@@ -20,6 +20,12 @@ const resources = {
         { title: 'പരിഹാരം ഉറപ്പാക്കുന്നു', body: 'പുരോഗതി പിന്തുടർന്ന് പരിഹാരം സ്ഥിരീകരിക്കാം.' },
       ],
       portalLabel: 'പോർട്ടലുകൾ', portalTitle: 'നിങ്ങൾക്കാവശ്യമായ NAAM സേവനം തിരഞ്ഞെടുക്കുക', portalIntro: 'ഓരോ പോർട്ടലും അതത് ചുമതലയ്ക്കനുസരിച്ചുള്ള ഉപകരണങ്ങളിലേക്ക് നയിക്കുന്നു.',
+      portals: [
+        { title: 'പൗരൻ', subtitle: 'Community Portal', description: 'പരിസ്ഥിതി പ്രശ്നങ്ങൾ റിപ്പോർട്ട് ചെയ്യുകയും പുരോഗതി പിന്തുടരുകയും ചെയ്യുക.', action: 'പ്രവേശിക്കുക' },
+        { title: 'അധികാരി', subtitle: 'Authority Portal', description: 'പരാതികൾ വിലയിരുത്തി ബന്ധപ്പെട്ട ഉദ്യോഗസ്ഥർക്ക് കൈമാറുക.', action: 'പ്രവേശിക്കുക' },
+        { title: 'ഫീൽഡ് ഓഫീസർ', subtitle: 'Field Officer Portal', description: 'സ്ഥലപരിശോധനയും പരിഹാര നടപടികളും രേഖപ്പെടുത്തുക.', action: 'പ്രവേശിക്കുക' },
+        { title: 'സിസ്റ്റം അഡ്മിൻ', subtitle: 'Super Admin Portal', description: 'പ്ലാറ്റ്‌ഫോം ക്രമീകരണങ്ങളും ഭരണപരമായ ഉപകരണങ്ങളും കൈകാര്യം ചെയ്യുക.', action: 'പ്രവേശിക്കുക' },
+      ],
       issueLabel: 'പരിസ്ഥിതി പ്രശ്നങ്ങൾ', issueTitle: 'നിങ്ങളുടെ പ്രദേശത്തെ പ്രശ്നങ്ങൾ അറിയിക്കുക', issueIntro: 'വിഷയം തിരഞ്ഞെടുക്കുമ്പോൾ പരാതി സമർപ്പിക്കുന്നതിനുള്ള ഫോം തുറക്കും.', report: 'റിപ്പോർട്ട് ചെയ്യുക',
       categories: [
         { title: 'മാലിന്യ നിയന്ത്രണം', description: 'കൂമ്പാരങ്ങൾ, ശേഖരണം, സംസ്കരണം' },
@@ -47,6 +53,12 @@ const resources = {
         { title: 'Resolution and verification', body: 'Follow progress and confirm when the issue is resolved.' },
       ],
       portalLabel: 'PORTALS', portalTitle: 'Choose the NAAM service you need', portalIntro: 'Each portal provides tools for its specific responsibilities.',
+      portals: [
+        { title: 'Citizen', subtitle: 'Community Portal', description: 'Report environmental issues and follow their progress.', action: 'Sign in' },
+        { title: 'Authority', subtitle: 'Authority Portal', description: 'Review reports and route them to the right teams.', action: 'Sign in' },
+        { title: 'Field Officer', subtitle: 'Field Officer Portal', description: 'Record site inspections and resolution work.', action: 'Sign in' },
+        { title: 'System Admin', subtitle: 'Super Admin Portal', description: 'Manage platform settings and administrative tools.', action: 'Sign in' },
+      ],
       issueLabel: 'ENVIRONMENTAL ISSUES', issueTitle: 'Report an issue in your area', issueIntro: 'Choose a category to open the report form.', report: 'Report an issue',
       categories: [
         { title: 'Waste management', description: 'Dumping, collection and disposal' },

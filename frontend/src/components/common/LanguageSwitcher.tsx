@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Languages } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import i18n from '../../i18n';
 
 export type Language = 'ml' | 'en';
 
@@ -22,8 +23,7 @@ export function LanguageSwitcher({
   const toggleLanguage = () => {
     const nextLang: Language = activeLang === 'ml' ? 'en' : 'ml';
     setLang(nextLang);
-    localStorage.setItem('naam_language', nextLang);
-    document.documentElement.lang = nextLang;
+    void i18n.changeLanguage(nextLang);
     if (onLanguageChange) {
       onLanguageChange(nextLang);
     }
@@ -38,6 +38,7 @@ export function LanguageSwitcher({
       type="button"
       onClick={toggleLanguage}
       aria-label={activeLang === 'ml' ? 'ഭാഷ മാറ്റുക: English' : 'Switch language to Malayalam'}
+      aria-pressed={activeLang === 'en'}
       className={cn(
         'inline-flex min-h-10 items-center gap-2 rounded-full border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         className
