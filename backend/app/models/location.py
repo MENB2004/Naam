@@ -9,6 +9,8 @@ from app.core.database import Base
 
 
 class SafeGeometry(Geometry):
+    inherit_cache = True
+
     def bind_expression(self, bindvalue):
         # On PostgreSQL, PostGIS handles ST_GeomFromEWKT.
         # For cross-database and local testing compatibility, avoid wrapping NULLs.
