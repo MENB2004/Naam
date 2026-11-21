@@ -14,6 +14,7 @@ import { ComplaintTracker } from '../features/complaints/ComplaintTracker';
 import { ComplaintDetail } from '../features/complaints/ComplaintDetail';
 import { AuthorityDashboard } from '../features/authorities/AuthorityDashboard';
 import { OfficerTaskList } from '../features/field-officer/OfficerTaskList';
+import { IssueMap } from '../features/maps/IssueMap';
 import { useAuthStore } from '../store/authStore';
 import { Logo } from '../components/common/Logo';
 import { Button } from '../components/ui/button';
@@ -170,6 +171,7 @@ export default function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/map" element={<IssueMap />} />
         <Route path="/design-system" element={<DesignShowcase />} />
 
         {/* Auth Routes */}
