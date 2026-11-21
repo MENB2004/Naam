@@ -38,31 +38,29 @@ The NAAM platform is engineered as a modern, decoupled cloud application with hi
 
 ### A. Frontend on Vercel
 1. **Live Production Status:**
-   - **Production URL:** [https://frontend-nine-orpin-72.vercel.app](https://frontend-nine-orpin-72.vercel.app)
-   - **Deployment Inspect:** [https://vercel.com/menbs-projects/frontend](https://vercel.com/menbs-projects/frontend)
+   - **Production URL:** [https://naam-duk.vercel.app](https://naam-duk.vercel.app)
+   - **Alias URL:** [https://frontend-nine-orpin-72.vercel.app](https://frontend-nine-orpin-72.vercel.app)
    - **Project Name:** `menbs-projects/frontend`
    - **Status:** Deployed & Ready (`READY`, HTTP 200)
-2. **Repository Connection:**
-   - Link the GitHub repository: `https://github.com/MENB2004/Naam.git`.
-   - Root Directory: `frontend`.
-   - Build Command: `npm run build`.
-   - Output Directory: `dist`.
-3. **Configuration (`frontend/vercel.json`):**
+2. **Reverse Proxy Configuration (`frontend/vercel.json`):**
    - Automatically handles Single-Page Application (SPA) routing fallbacks to `/index.html`.
-   - Re-routes `/api/v1/:path*` directly to the production backend ASGI host.
+   - Proxies `/api/v1/:match*` seamlessly to the live backend: `https://backend-seven-eta-ktpzugfyzl.vercel.app/api/v1/:match*`.
+   - Proxies `/health` to `https://backend-seven-eta-ktpzugfyzl.vercel.app/health`.
    - Applies security headers (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`).
-4. **Environment Variables on Vercel:**
-   - `VITE_API_URL`: `/api/v1` (or full backend URL `https://naam-backend.onrender.com/api/v1`).
 
 ---
 
-### B. Backend on Render / Container Host
-1. **Infrastructure as Code (`render.yaml`):**
-   - Service Type: `web`.
-   - Runtime: `docker` (`backend/Dockerfile`).
-   - Healthcheck Path: `/health`.
-2. **Environment Variables on Render:**
-   - `DATABASE_URL`: Managed connection string with pure-Python driver: `postgresql+pg8000://...`.
+### B. Backend on Vercel Serverless + Neon PostgreSQL
+1. **Live Production Status:**
+   - **Backend API URL:** [https://backend-seven-eta-ktpzugfyzl.vercel.app](https://backend-seven-eta-ktpzugfyzl.vercel.app)
+   - **Project Name:** `menbs-projects/backend`
+   - **Runtime:** Native Python 3.12 (FastAPI ASGI Serverless Function)
+   - **Status:** Deployed & Ready (`READY`, HTTP 200)
+2. **Database Integration:**
+   - **Engine:** Neon Cloud PostgreSQL 16 with PostGIS 3.6 extension.
+   - **Region:** Singapore (`ap-southeast-1`), branch `production`.
+   - **Driver:** Pure-Python `pg8000` driver with SSL encryption.
+   - **Connected Environment Variable:** `DATABASE_URL` stored securely in Vercel project secrets.
    - `SECRET_KEY`: High-entropy 64-character secret generated via `openssl rand -hex 32`.
    - `BACKEND_CORS_ORIGINS`: `["https://naam.vercel.app","https://naam.kerala.gov.in"]`.
    - `ENVIRONMENT`: `production`.

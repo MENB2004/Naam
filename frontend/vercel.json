@@ -3,7 +3,11 @@
   "rewrites": [
     {
       "source": "/api/v1/:match*",
-      "destination": "https://naam-backend.onrender.com/api/v1/:match*"
+      "destination": "https://backend-seven-eta-ktpzugfyzl.vercel.app/api/v1/:match*"
+    },
+    {
+      "source": "/health",
+      "destination": "https://backend-seven-eta-ktpzugfyzl.vercel.app/health"
     },
     {
       "source": "/(.*)",
