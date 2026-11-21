@@ -8,6 +8,7 @@
 - **ADR-005:** Approved phase execution model with temporary execution markdown files deleted strictly upon verified phase completion.
 - **ADR-006:** Approved pure-Python PBKDF2-HMAC-SHA256 password hashing and pure-Python database drivers (`pg8000`, `sqlite3`) to guarantee 100% compatibility with Windows Defender Application Control (WDAC).
 - **ADR-007:** Approved Kerala geographic bounding box enforcement (Lat 8.0-13.0, Lon 74.5-77.8) with Leaflet interactive pin-drop map and citizen tracking codes (`NAAM-YYYY-XXXXX`).
+- **ADR-008:** Approved formal Complaint Lifecycle State Machine engine with role-based transition validation, immutable audit log history in `complaint_updates`, citizen appeal workflows, and bilingual status reporting.
 
 ## 2. User Approvals Log
 | Date | Milestone / Phase | Decision / Instruction | Approved By |
@@ -19,3 +20,4 @@
 | 2026-11-21 | Phase 03: Database Foundation | SQLAlchemy 2.0 models, pure-Python driver support (pg8000/sqlite), idempotent master data seeder (4 roles, 4 departments), test suite passing. | Completed & Verified |
 | 2026-11-21 | Phase 04: Authentication & RBAC | Multi-portal auth (/login/community, /login/authority, /login/officer, /login/admin), citizen register, JWT rotation, ProtectedRoute guards, 11/11 tests passing. | Completed & Verified |
 | 2026-11-21 | Phase 05: Community Portal | 4-step Complaint Wizard, Leaflet pin dropper, photo evidence preview, tracking codes, Citizen Dashboard, My Reports, Public Tracker, 15/15 tests passing. | User Approved ("do according git pushes also") |
+| 2026-11-21 | Phase 06: Complaint Lifecycle | State machine engine, status transition endpoint, audit trail log, visual timeline, ComplaintDetail with interactive role actions, 19/19 tests passing. | User Approved ("do") |

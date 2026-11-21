@@ -12,9 +12,12 @@ from app.models.location import Location
 from app.schemas.complaint import (
     ComplaintCreate,
     ComplaintOut,
+    ComplaintUpdateOut,
+    StatusUpdatePayload,
     CATEGORY_ML_MAP,
     STATUS_ML_MAP,
 )
+from app.services.complaint_state_machine import validate_status_transition
 
 router = APIRouter()
 
@@ -231,3 +234,119 @@ def list_public_complaints(
     stmt = stmt.order_by(desc(Complaint.created_at)).limit(limit).offset(offset)
     results = db.scalars(stmt).all()
     return [serialize_complaint(c) for c in results]
+
+
+@router.get("/{complaint_id}", response_model=ComplaintOut, tags=["Complaints"])
+def get_complaint_by_id(
+    complaint_id: uuid.UUID,
+    db: Session = Depends(get_db),
+):
+    """Retrieve full details of a specific complaint by UUID."""
+    stmt = (
+        select(Complaint)
+        .options(
+            selectinload(Complaint.reporter),
+            selectinload(Complaint.department),
+            selectinload(Complaint.location),
+            selectinload(Complaint.evidence),
+            selectinload(Complaint.updates).selectinload(ComplaintUpdate.author),
+        )
+        .where(Complaint.id == complaint_id)
+    )
+    complaint = db.scalars(stmt).first()
+    if not complaint:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="പരാതി കണ്ടെത്തിയില്ല (Complaint not found)",
+        )
+    return serialize_complaint(complaint)
+
+
+@router.get("/{complaint_id}/timeline", response_model=List[ComplaintUpdateOut], tags=["Complaints"])
+def get_complaint_timeline(
+    complaint_id: uuid.UUID,
+    db: Session = Depends(get_db),
+):
+    """Retrieve chronological audit timeline updates for a complaint."""
+    stmt = (
+        select(ComplaintUpdate)
+        .options(selectinload(ComplaintUpdate.author))
+        .where(ComplaintUpdate.complaint_id == complaint_id)
+        .order_by(ComplaintUpdate.created_at.asc())
+    )
+    updates = db.scalars(stmt).all()
+    return [
+        ComplaintUpdateOut(
+            id=u.id,
+            previous_status=u.previous_status,
+            new_status=u.new_status,
+            remarks=u.remarks,
+            created_at=u.created_at,
+            author_name=u.author.full_name if u.author else "സിസ്റ്റം",
+        )
+        for u in updates
+    ]
+
+
+@router.post("/{complaint_id}/status", response_model=ComplaintOut, tags=["Complaints"])
+def update_complaint_status(
+    complaint_id: uuid.UUID,
+    payload: StatusUpdatePayload,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Transition complaint lifecycle status with state machine enforcement and audit logging.
+    """
+    stmt = (
+        select(Complaint)
+        .options(
+            selectinload(Complaint.reporter),
+            selectinload(Complaint.department),
+            selectinload(Complaint.location),
+            selectinload(Complaint.evidence),
+            selectinload(Complaint.updates).selectinload(ComplaintUpdate.author),
+        )
+        .where(Complaint.id == complaint_id)
+    )
+    complaint = db.scalars(stmt).first()
+    if not complaint:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="പരാതി കണ്ടെത്തിയില്ല (Complaint not found)",
+        )
+
+    # 1. Enforce state machine rules & RBAC permissions
+    user_role_str = current_user.role.name if hasattr(current_user.role, "name") else str(current_user.role)
+    is_owner = str(complaint.reporter_id) == str(current_user.id)
+
+    validate_status_transition(
+        current_status=complaint.current_status,
+        target_status=payload.new_status,
+        user_role=user_role_str,
+        is_owner=is_owner,
+    )
+
+    prev_status = complaint.current_status
+    new_status_upper = payload.new_status.upper()
+
+    # 2. Update complaint model
+    complaint.current_status = new_status_upper
+    if payload.department_id:
+        complaint.department_id = payload.department_id
+
+    # 3. Create immutable audit entry in complaint_updates
+    audit_update = ComplaintUpdate(
+        id=uuid.uuid4(),
+        complaint_id=complaint.id,
+        changed_by=current_user.id,
+        previous_status=prev_status,
+        new_status=new_status_upper,
+        remarks=payload.remarks.strip(),
+    )
+    db.add(audit_update)
+    db.commit()
+
+    # Reload complaint
+    db.refresh(complaint)
+    return serialize_complaint(complaint)

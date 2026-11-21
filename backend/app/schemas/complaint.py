@@ -106,6 +106,13 @@ class ComplaintCreate(BaseModel):
     evidence: Optional[List[EvidenceCreate]] = []
 
 
+class StatusUpdatePayload(BaseModel):
+    new_status: str = Field(..., description="Target lifecycle state")
+    remarks: str = Field(..., min_length=2, max_length=1000, description="Audit log explanation")
+    assigned_to_id: Optional[uuid.UUID] = None
+    department_id: Optional[uuid.UUID] = None
+
+
 class ComplaintOut(BaseModel):
     id: uuid.UUID
     tracking_code: str

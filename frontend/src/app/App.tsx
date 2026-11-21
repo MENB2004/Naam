@@ -19,6 +19,7 @@ import { CitizenDashboard } from '../features/community/CitizenDashboard';
 import { ComplaintWizard } from '../features/community/ComplaintWizard';
 import { MyReports } from '../features/community/MyReports';
 import { ComplaintTracker } from '../features/complaints/ComplaintTracker';
+import { ComplaintDetail } from '../features/complaints/ComplaintDetail';
 import { useAuthStore } from '../store/authStore';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -368,9 +369,10 @@ export default function App() {
         <Route path="/login/admin" element={<LoginForm portal="admin" />} />
         <Route path="/register" element={<RegisterForm />} />
 
-        {/* Tracking Routes */}
+        {/* Tracking & Complaint Detail Routes */}
         <Route path="/track" element={<ComplaintTracker />} />
         <Route path="/track/:trackingCode" element={<ComplaintTracker />} />
+        <Route path="/complaints/:id" element={<ComplaintDetail />} />
 
         {/* Protected Community Portal */}
         <Route
