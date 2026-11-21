@@ -21,6 +21,7 @@ import { MyReports } from '../features/community/MyReports';
 import { ComplaintTracker } from '../features/complaints/ComplaintTracker';
 import { ComplaintDetail } from '../features/complaints/ComplaintDetail';
 import { useAuthStore } from '../store/authStore';
+import { Logo } from '../components/common/Logo';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -33,15 +34,7 @@ function LandingPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-white/90 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-[#087C63] flex items-center justify-center text-white font-bold text-xl shadow-md">
-              നാം
-            </div>
-            <div>
-              <span className="font-bold text-xl text-[#087C63] tracking-tight">NAAM</span>
-              <span className="text-xs text-slate-500 block -mt-1 font-medium">ജനകീയ പരിസ്ഥിതി വേദി</span>
-            </div>
-          </div>
+          <Logo height={44} />
           <div className="flex items-center space-x-3">
             {isAuthenticated && user ? (
               <div className="flex items-center space-x-3">
@@ -80,6 +73,10 @@ function LandingPage() {
 
       {/* Hero Section */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center text-center">
+        <div className="mb-4">
+          <Logo height={80} showLink={false} className="mx-auto" />
+        </div>
+
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#E8F5EE] text-[#087C63] text-xs font-semibold mb-6">
           <Shield className="w-4 h-4" />
           <span>കേരള സർക്കാരിന്റെ തദ്ദേശ സ്വയംഭരണ വകുപ്പുകളുമായി ബന്ധിപ്പിച്ചിരിക്കുന്നു</span>
@@ -239,12 +236,10 @@ function PortalDashboardView({
       <header className="bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Link to="/" className="w-10 h-10 rounded-xl bg-[#087C63] flex items-center justify-center text-white font-bold text-xl shadow-md">
-              നാം
-            </Link>
-            <div>
-              <span className="font-bold text-lg text-slate-900 tracking-tight">{titleMl}</span>
-              <span className="text-xs text-slate-500 block -mt-1">{titleEn}</span>
+            <Logo height={40} />
+            <div className="border-l border-slate-200 pl-3">
+              <span className="font-bold text-sm text-slate-900 tracking-tight block">{titleMl}</span>
+              <span className="text-[10px] text-slate-500 block">{titleEn}</span>
             </div>
           </div>
           <div className="flex items-center space-x-4">

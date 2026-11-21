@@ -41,6 +41,13 @@ export function DesignShowcase() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-12">
         {/* Title */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="flex justify-center mb-2">
+            <img
+              src="/naam-logo.png"
+              alt="NAAM Official Logo"
+              className="h-20 sm:h-24 object-contain shadow-sm rounded-xl p-2 bg-white border border-slate-200"
+            />
+          </div>
           <Badge variant="secondary" className="px-3 py-1 text-xs">
             <Sparkles className="w-3.5 h-3.5 mr-1 text-[#087C63]" />
             NAAM UI/UX Design System v1.0

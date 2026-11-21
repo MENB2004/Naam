@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { LanguageSwitcher, Language } from '../common/LanguageSwitcher';
+import { Logo } from '../common/Logo';
 import { Shield } from 'lucide-react';
 
 interface PortalHeaderProps {
@@ -27,22 +28,12 @@ export function PortalHeader({
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white/90 border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand */}
-        <Link to="/" className="flex items-center space-x-3 group">
-          <div className="w-10 h-10 rounded-xl bg-[#087C63] flex items-center justify-center text-white font-bold text-xl shadow-md group-hover:scale-105 transition-transform">
-            നാം
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="font-bold text-xl text-[#087C63] tracking-tight">NAAM</span>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${roleInfo.color}`}>
-                {currentLang === 'ml' ? roleInfo.ml : roleInfo.en}
-              </span>
-            </div>
-            <span className="text-xs text-slate-500 block -mt-1 font-medium">
-              {currentLang === 'ml' ? 'ജനകീയ പരിസ്ഥിതി വേദി' : "People's Environmental Platform"}
-            </span>
-          </div>
-        </Link>
+        <div className="flex items-center space-x-3">
+          <Logo height={40} />
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${roleInfo.color}`}>
+            {currentLang === 'ml' ? roleInfo.ml : roleInfo.en}
+          </span>
+        </div>
 
         {/* Navigation Items */}
         <nav className="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-600">

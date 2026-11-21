@@ -18,6 +18,7 @@ import {
 import { useAuthStore } from '../../store/authStore';
 import { complaintService } from '../../services/complaintService';
 import { Complaint } from '../../types/complaint';
+import { Logo } from '../../components/common/Logo';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
@@ -67,12 +68,10 @@ export const CitizenDashboard: React.FC = () => {
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Link to="/" className="w-10 h-10 rounded-xl bg-[#087C63] flex items-center justify-center text-white font-bold text-xl shadow-md">
-              നാം
-            </Link>
-            <div>
-              <span className="font-bold text-lg text-slate-900 tracking-tight">പൗര പോർട്ടൽ</span>
-              <span className="text-xs text-slate-500 block -mt-1 font-medium">Community Environmental Desk</span>
+            <Logo height={38} />
+            <div className="border-l border-slate-200 pl-3 hidden sm:block">
+              <span className="font-bold text-sm text-slate-900 tracking-tight block">പൗര പോർട്ടൽ</span>
+              <span className="text-[10px] text-slate-500 block">Community Environmental Desk</span>
             </div>
           </div>
 

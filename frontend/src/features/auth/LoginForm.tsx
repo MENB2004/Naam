@@ -14,6 +14,7 @@ import {
 import { useAuthStore } from '../../store/authStore';
 import { authService } from '../../services/authService';
 import { UserRole } from '../../types/auth';
+import { Logo } from '../../components/common/Logo';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../../components/ui/card';
@@ -154,15 +155,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ portal }) => {
   return (
     <div className="min-h-screen bg-[#F0F7FA] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link to="/" className="inline-flex items-center space-x-3 mb-4 group">
-          <div className="w-12 h-12 rounded-2xl bg-[#087C63] flex items-center justify-center text-white font-bold text-2xl shadow-md group-hover:scale-105 transition">
-            നാം
-          </div>
-          <div className="text-left">
-            <span className="font-extrabold text-2xl text-[#087C63] tracking-tight block">NAAM</span>
-            <span className="text-xs text-slate-500 font-medium">ജനകീയ പരിസ്ഥിതി വേദി</span>
-          </div>
-        </Link>
+        <Logo height={56} className="mx-auto mb-2" />
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md px-4">
