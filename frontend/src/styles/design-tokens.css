@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@400;500;600;700;800&family=Baloo+Chettan+2:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap');
 
 /* NAAM (നാം) Design Tokens & Theme Variables */
 
@@ -19,6 +19,8 @@
   --ring: 166 88% 26%;
   --radius: 0.75rem;
   --font-malayalam: 'Noto Sans Malayalam';
+  --font-malayalam-display: 'Anek Malayalam';
+  --font-malayalam-accent: 'Baloo Chettan 2';
   --font-display: 'Instrument Serif';
   --font-body: 'Inter';
   --shadow-dashboard: 0 25px 80px -12px rgb(0 0 0 / 0.08), 0 0 0 1px rgb(0 0 0 / 0.06);
@@ -40,6 +42,7 @@
 
   /* Typography */
   --font-family-malayalam: 'Noto Sans Malayalam', 'Manjari', sans-serif;
+  --font-family-malayalam-display: 'Anek Malayalam', 'Noto Sans Malayalam', sans-serif;
   --font-family-sans: 'Inter', 'Noto Sans Malayalam', sans-serif;
 
   /* Elevation */

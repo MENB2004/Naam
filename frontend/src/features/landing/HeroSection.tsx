@@ -1,28 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ArrowDown, ArrowRight, Building2, HardHat, Leaf, LogOut, Menu, ShieldCheck, Users, X, MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { ArrowDown, ArrowRight, Building2, HardHat, Leaf, LogOut, Menu, ShieldCheck, Users, X, MapPin, Recycle, Droplets, Waves, CloudRain, CircleHelp } from 'lucide-react';
 import { Logo } from '../../components/common/Logo';
 import { LanguageSwitcher, Language } from '../../components/common/LanguageSwitcher';
 import { useAuthStore } from '../../store/authStore';
 import { EnvironmentalDashboardPreview } from './EnvironmentalDashboardPreview';
-
-const copy = {
-  ml: {
-    nav: ['ഹോം', 'NAAM എന്താണ്', 'എങ്ങനെ പ്രവർത്തിക്കുന്നു', 'പരിസ്ഥിതി പ്രശ്നങ്ങൾ', 'ബന്ധപ്പെടുക'],
-    badge: 'കേരളത്തിന്റെ പരിസ്ഥിതി സംരക്ഷണത്തിനായി ഒരുമിച്ച്',
-    headingA: 'നമ്മുടെ നാടിന്റെ പരിസ്ഥിതി സംരക്ഷണം,', headingB: 'ഇനി നമ്മുടെ കൈകളിൽ.',
-    body: 'മാലിന്യ പ്രശ്നങ്ങൾ, ജലമലിനീകരണം, ഡ്രെയിനേജ് തടസ്സങ്ങൾ തുടങ്ങിയ പരിസ്ഥിതി പ്രശ്നങ്ങൾ റിപ്പോർട്ട് ചെയ്യാനും ബന്ധപ്പെട്ട അധികാരികളുമായി ബന്ധപ്പെടാനും അവയുടെ പരിഹാര പുരോഗതി നിരീക്ഷിക്കാനും NAAM നിങ്ങളെ സഹായിക്കുന്നു.',
-    report: 'പ്രശ്നം റിപ്പോർട്ട് ചെയ്യുക', how: 'എങ്ങനെ പ്രവർത്തിക്കുന്നു?',
-  },
-  en: {
-    nav: ['Home', 'About NAAM', 'How It Works', 'Environmental Issues', 'Contact'],
-    badge: 'Together for a cleaner, healthier Kerala',
-    headingA: 'Protecting the places', headingB: 'we call home.',
-    body: 'NAAM helps communities report waste, water pollution, blocked drains and other environmental concerns, connect with the right authorities, and follow each issue through to resolution.',
-    report: 'Report an Issue', how: 'How It Works',
-  },
-} as const;
 
 function LandscapeBackdrop() {
   return <div aria-hidden="true" className="absolute inset-0 overflow-hidden bg-background">
@@ -39,20 +23,25 @@ function LandscapeBackdrop() {
 
 export function HeroSection() {
   const [language, setLanguage] = useState<Language>(() => localStorage.getItem('naam_language') === 'en' ? 'en' : 'ml');
+  const { t: translate, i18n } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuthStore();
   const reducedMotion = useReducedMotion();
-  const t = copy[language];
+  const t = {
+    nav: translate('hero.nav', { returnObjects: true }) as string[],
+    badge: translate('hero.badge'), headingA: translate('hero.headingA'), headingB: translate('hero.headingB'),
+    body: translate('hero.body'), report: translate('hero.report'), how: translate('hero.how'),
+  };
   const transition = (delay: number) => reducedMotion ? { duration: 0 } : { duration: 0.6, delay, ease: 'easeOut' as const };
   const links = ['#home', '#about', '#how', '#issues', '#contact'];
-  const changeLanguage = (next: Language) => { setLanguage(next); localStorage.setItem('naam_language', next); };
+  const changeLanguage = (next: Language) => { setLanguage(next); void i18n.changeLanguage(next); };
 
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
 
-  return <section id="home" className="relative flex h-screen h-[100svh] flex-col overflow-hidden bg-background">
+  return <section id="home" className="relative flex min-h-screen min-h-[100svh] flex-col overflow-hidden bg-background">
     <LandscapeBackdrop />
     <header className="relative z-30 flex shrink-0 items-center justify-between px-5 py-4 md:px-12 md:py-5 lg:px-20">
       <Logo height={40} className="h-9 md:h-11" />
@@ -73,7 +62,7 @@ export function HeroSection() {
 
     <div className="relative z-10 flex min-h-0 w-full flex-1 flex-col items-center overflow-hidden px-4 pt-2 text-center sm:px-6 sm:pt-4">
       <motion.div lang={language} initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={transition(0)} className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-background/85 px-4 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur-md md:mb-5 md:text-sm"><Leaf size={14} className="text-primary"/><span>{t.badge}</span></motion.div>
-      <motion.h1 lang={language} initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={transition(.1)} className="max-w-4xl font-malayalam text-[clamp(2rem,5.2vw,4.5rem)] font-semibold leading-[1.35] tracking-normal text-foreground md:leading-[1.3]">
+      <motion.h1 lang={language} initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={transition(.1)} className={`max-w-4xl text-[clamp(2rem,5.2vw,4.5rem)] font-bold leading-[1.35] tracking-normal text-foreground md:leading-[1.3] ${language === 'ml' ? 'ml-display' : 'font-display font-normal'}`}>
         {language === 'ml' ? <>{t.headingA}<br className="hidden sm:block"/><span className="text-primary"> {t.headingB}</span></> : <>{t.headingA}<br/><span className="font-display text-[1.12em] font-normal italic text-primary">{t.headingB}</span></>}
       </motion.h1>
       <motion.p lang={language} initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={transition(.2)} className="mt-3 max-w-[650px] text-sm leading-[1.8] text-muted-foreground md:mt-4 md:text-base">{t.body}</motion.p>
@@ -92,12 +81,12 @@ export function HeroSection() {
 
 export function LandingSections() {
   return <div className="bg-background">
-    <section id="about" className="mx-auto max-w-6xl px-6 py-16 md:py-24"><p className="text-xs font-semibold uppercase tracking-[.2em] text-primary">NAAM · നാം</p><h2 className="mt-3 max-w-2xl font-malayalam text-3xl font-semibold text-foreground md:text-4xl">പരാതിയിൽ നിന്ന് പരിഹാരത്തിലേക്ക്, ഒരുമിച്ച്.</h2><p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">കേരളത്തിലെ സമൂഹങ്ങളെയും പ്രാദേശിക സ്ഥാപനങ്ങളെയും ബന്ധിപ്പിക്കുന്ന പരിസ്ഥിതി നിരീക്ഷണ വേദിയാണ് NAAM.</p></section>
-    <section id="how" className="border-y border-border bg-white/55"><div className="mx-auto grid max-w-6xl gap-5 px-6 py-14 md:grid-cols-3 md:py-20">{[['01','റിപ്പോർട്ട് ചെയ്യുക','സ്ഥലവും വിവരങ്ങളും ചേർത്ത് പരിസ്ഥിതി പ്രശ്നം സമർപ്പിക്കുക.'],['02','അധികാരികളുമായി ബന്ധപ്പെടുക','ശരിയായ വകുപ്പിനും ഫീൽഡ് ഓഫീസർക്കും പരാതി കൈമാറുക.'],['03','പുരോഗതി നിരീക്ഷിക്കുക','നടപടികളും പരിഹാര വിവരങ്ങളും പിന്തുടരുക.']].map(([n,title,body])=><article key={n} className="rounded-2xl border border-border bg-background p-5"><span className="text-xs font-semibold text-primary">{n}</span><h3 className="mt-2 font-malayalam text-lg font-semibold text-foreground">{title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p></article>)}</div></section>
+    <section id="about" className="mx-auto max-w-6xl px-5 py-16 md:px-6 md:py-24"><p className="text-xs font-semibold uppercase tracking-[.2em] text-primary">NAAM · നാം</p><h2 className="ml-display mt-3 max-w-2xl text-3xl font-bold leading-[1.4] text-foreground md:text-4xl">പരാതിയിൽ നിന്ന് പരിഹാരത്തിലേക്ക്, ഒരുമിച്ച്.</h2><p className="mt-4 max-w-2xl text-sm leading-[1.8] text-muted-foreground md:text-base">കേരളത്തിലെ സമൂഹങ്ങളെയും പ്രാദേശിക സ്ഥാപനങ്ങളെയും ബന്ധിപ്പിക്കുന്ന പരിസ്ഥിതി നിരീക്ഷണ വേദിയാണ് NAAM.</p></section>
+    <section id="how" className="border-y border-border bg-muted/40"><div className="mx-auto max-w-6xl px-5 py-14 md:px-6 md:py-20"><div className="mb-8 max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[.18em] text-primary">HOW IT WORKS · പ്രവർത്തനരീതി</p><h2 className="ml-display mt-2 text-2xl font-bold leading-[1.4] text-foreground md:text-3xl">പരാതി മുതൽ പരിഹാര പരിശോധന വരെ</h2><p className="mt-2 text-sm leading-[1.8] text-muted-foreground">ഓരോ ഘട്ടത്തിലും എന്താണ് സംഭവിക്കുന്നതെന്ന് എളുപ്പത്തിൽ മനസ്സിലാക്കാം.</p></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[['01','പ്രശ്നം റിപ്പോർട്ട് ചെയ്യുക','സ്ഥലവും ആവശ്യമായ വിവരങ്ങളും ചേർത്ത് പരാതി സമർപ്പിക്കുക.'],['02','അധികാരികൾ പരിശോധിക്കുന്നു','പരാതി ശരിയായ വകുപ്പിലേക്ക് കൈമാറുന്നു.'],['03','സ്ഥലപരിശോധന നടത്തുന്നു','ഫീൽഡ് ഉദ്യോഗസ്ഥർ പരിശോധിച്ച് നടപടികൾ രേഖപ്പെടുത്തുന്നു.'],['04','പരിഹാരം ഉറപ്പാക്കുന്നു','പുരോഗതി പിന്തുടർന്ന് പരിഹാരം സ്ഥിരീകരിക്കാം.']].map(([n,title,body])=><article key={n} className="relative rounded-2xl border border-border bg-background p-5 shadow-sm"><span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 text-sm font-bold text-primary">{n}</span><h3 className="ml-display mt-4 text-lg font-semibold leading-[1.5] text-foreground">{title}</h3><p className="mt-2 text-sm leading-[1.8] text-muted-foreground">{body}</p></article>)}</div></div></section>
     <section id="portals" className="mx-auto max-w-6xl px-6 py-14 md:py-20">
       <div className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-[.18em] text-primary">PORTALS · പോർട്ടലുകൾ</p>
-        <h2 className="mt-3 font-malayalam text-2xl font-semibold leading-[1.45] text-foreground md:text-3xl">നിങ്ങൾക്കാവശ്യമായ NAAM സേവനം തിരഞ്ഞെടുക്കുക</h2>
+        <h2 className="ml-display mt-3 text-2xl font-bold leading-[1.45] text-foreground md:text-3xl">നിങ്ങൾക്കാവശ്യമായ NAAM സേവനം തിരഞ്ഞെടുക്കുക</h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">ഓരോ പോർട്ടലും അതത് ചുമതലയ്ക്കനുസരിച്ചുള്ള ഉപകരണങ്ങളിലേക്ക് നയിക്കുന്നു.</p>
       </div>
       <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -109,7 +98,7 @@ export function LandingSections() {
         ].map(({ Icon, title, subtitle, description, to, tone }) => (
           <Link key={to} to={to} className="group flex min-h-56 flex-col rounded-2xl border border-border bg-background p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/35 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
             <span className={`grid h-11 w-11 place-items-center rounded-xl ${tone}`}><Icon size={20}/></span>
-            <h3 className="mt-4 font-malayalam text-base font-semibold leading-[1.45] text-foreground">{title}</h3>
+            <h3 className="ml-display mt-4 text-base font-bold leading-[1.5] text-foreground">{title}</h3>
             <p className="mt-0.5 text-xs font-medium text-muted-foreground">{subtitle}</p>
             <p className="mt-3 flex-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
             <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-primary">പ്രവേശിക്കുക <span aria-hidden="true">·</span> Sign in <ArrowRight size={13} className="transition-transform group-hover:translate-x-1"/></span>
@@ -117,7 +106,7 @@ export function LandingSections() {
         ))}
       </div>
     </section>
-    <section id="issues" className="mx-auto max-w-6xl px-6 py-14 md:py-20"><h2 className="font-malayalam text-2xl font-semibold text-foreground">നിങ്ങളുടെ പ്രദേശത്തെ പ്രശ്നങ്ങൾ അറിയിക്കുക</h2><div className="mt-5 flex flex-wrap gap-2">{['മാലിന്യ നിയന്ത്രണം','ജലമലിനീകരണം','ഡ്രെയിനേജ്','വെള്ളപ്പൊക്കം'].map(x=><span key={x} className="rounded-full border border-border bg-white px-4 py-2 text-sm text-muted-foreground">{x}</span>)}</div></section>
+    <section id="issues" className="mx-auto max-w-6xl px-5 py-14 md:px-6 md:py-20"><div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[.18em] text-primary">ENVIRONMENTAL ISSUES · പരിസ്ഥിതി പ്രശ്നങ്ങൾ</p><h2 className="ml-display mt-2 text-2xl font-bold leading-[1.45] text-foreground md:text-3xl">നിങ്ങളുടെ പ്രദേശത്തെ പ്രശ്നങ്ങൾ അറിയിക്കുക</h2><p className="mt-2 text-sm leading-[1.8] text-muted-foreground">വിഷയം തിരഞ്ഞെടുക്കുമ്പോൾ പരാതി സമർപ്പിക്കുന്നതിനുള്ള ഫോം തുറക്കും.</p></div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{[{Icon:Recycle,title:'മാലിന്യ നിയന്ത്രണം',desc:'കൂമ്പാരങ്ങൾ, ശേഖരണം, സംസ്കരണം',color:'text-primary bg-primary/10'}, {Icon:Droplets,title:'ജലമലിനീകരണം',desc:'കുളങ്ങൾ, നദികൾ, കുടിവെള്ളം',color:'text-accent bg-accent/10'}, {Icon:Waves,title:'ഓടയും മലിനജലവും',desc:'തടസ്സങ്ങളും ചോർച്ചകളും',color:'text-secondary bg-secondary/10'}, {Icon:CloudRain,title:'വെള്ളപ്പൊക്കം',desc:'വെള്ളക്കെട്ടും പ്രളയസാധ്യതയും',color:'text-brand-blue bg-brand-blue/10'}, {Icon:CircleHelp,title:'മറ്റ് പരിസ്ഥിതി പ്രശ്നങ്ങൾ',desc:'മറ്റു പ്രാദേശിക ആശങ്കകൾ',color:'text-muted-foreground bg-muted'}].map(({Icon,title,desc,color})=><Link key={title} to="/community/report" className="group rounded-2xl border border-border bg-background p-4 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><span className={`grid h-10 w-10 place-items-center rounded-xl ${color}`}><Icon size={19}/></span><h3 className="ml-display mt-3 text-sm font-semibold leading-[1.5] text-foreground">{title}</h3><p className="mt-1 text-xs leading-[1.7] text-muted-foreground">{desc}</p><span className="mt-3 inline-flex text-xs font-semibold text-primary">റിപ്പോർട്ട് ചെയ്യുക <ArrowRight size={13} className="ml-1 transition-transform group-hover:translate-x-1"/></span></Link>)}</div></section>
     <footer id="contact" className="border-t border-border bg-white/60"><div className="mx-auto flex max-w-6xl flex-col justify-between gap-5 px-6 py-8 md:flex-row md:items-center"><div><Logo height={34}/><p className="mt-2 text-xs text-muted-foreground">People's Environmental Monitoring and Resolution Platform · Kerala</p></div><div className="flex flex-wrap gap-3 text-xs text-muted-foreground"><Link to="/map" className="font-semibold text-emerald-700 hover:text-emerald-800">Live Map</Link><Link to="/login/community" className="hover:text-primary">Community</Link><Link to="/login/authority" className="hover:text-primary">Authority</Link><Link to="/login/officer" className="hover:text-primary">Field Officer</Link><Link to="/login/admin" className="hover:text-primary">Admin</Link><Link to="/design-system" className="hover:text-primary">Design system</Link></div></div></footer>
   </div>;
 }

@@ -44,6 +44,10 @@ export default {
       },
       fontFamily: {
         display: ['var(--font-display)', 'serif'],
+        'ml-display': ['var(--font-malayalam-display)', 'var(--font-malayalam)', 'sans-serif'],
+        'ml-body': ['var(--font-malayalam)', 'sans-serif'],
+        'ml-accent': ['var(--font-malayalam-accent)', 'var(--font-malayalam)', 'sans-serif'],
+        'en-body': ['var(--font-body)', 'sans-serif'],
         body: ['var(--font-body)', 'var(--font-malayalam)', 'sans-serif'],
         malayalam: ['var(--font-malayalam)', 'sans-serif'],
         sans: ['var(--font-body)', 'var(--font-malayalam)', 'sans-serif'],

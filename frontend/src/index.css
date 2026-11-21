@@ -28,6 +28,22 @@
     font-family: var(--font-display), serif;
   }
 
+  .ml-display {
+    font-family: var(--font-malayalam-display), var(--font-malayalam), sans-serif;
+  }
+
+  .ml-body {
+    font-family: var(--font-malayalam), sans-serif;
+  }
+
+  .ml-accent {
+    font-family: var(--font-malayalam-accent), var(--font-malayalam), sans-serif;
+  }
+
+  .en-body {
+    font-family: var(--font-body), sans-serif;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     line-height: 1.42;
     letter-spacing: normal;
