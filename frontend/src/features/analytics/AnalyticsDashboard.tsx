@@ -63,7 +63,7 @@ export const AnalyticsDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-16">
-      <PortalHeader activeRole="COMMUNITY" />
+      <PortalHeader activeRole="AUTHORITY" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
         {/* Page Header */}

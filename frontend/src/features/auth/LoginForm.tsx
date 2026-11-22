@@ -10,6 +10,7 @@ import {
   HardHat,
   KeyRound,
   ArrowRight,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { authService } from '../../services/authService';
@@ -19,10 +20,10 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../../components/ui/card';
 
-export type PortalType = 'community' | 'authority' | 'officer' | 'admin';
+export type PortalType = 'community' | 'authority' | 'officer' | 'admin' | 'official';
 
 interface PortalConfig {
-  expectedRole: UserRole;
+  expectedRole?: UserRole;
   titleMl: string;
   titleEn: string;
   subtitleMl: string;
@@ -31,7 +32,7 @@ interface PortalConfig {
   badgeText: string;
   icon: React.ElementType;
   redirectUrl: string;
-  demoUser: {
+  demoUser?: {
     identifier: string;
     labelMl: string;
   };
@@ -98,6 +99,16 @@ const PORTAL_CONFIGS: Record<PortalType, PortalConfig> = {
       labelMl: 'ഡെമോ സിസ്റ്റം അഡ്മിൻ (State Super Admin)',
     },
   },
+  official: {
+    titleMl: 'ഔദ്യോഗിക പ്രവേശനം',
+    titleEn: 'Official Access',
+    subtitleMl: 'അംഗീകൃത ഉദ്യോഗസ്ഥർക്ക് മാത്രം. അക്കൗണ്ടിലെ അധികാരപ്രകാരം ഡാഷ്ബോർഡിലേക്ക് പ്രവേശിക്കും.',
+    accentColor: '#1E293B',
+    badgeBg: 'bg-slate-100',
+    badgeText: 'text-slate-700 border-slate-300',
+    icon: ShieldCheck,
+    redirectUrl: '/dashboard',
+  },
 };
 
 interface LoginFormProps {
@@ -108,6 +119,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ portal }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const config = PORTAL_CONFIGS[portal];
+  const publicSiteUrl = (import.meta as any).env?.VITE_PUBLIC_SITE_URL || '/';
   const { setAuth } = useAuthStore();
 
   const [identifier, setIdentifier] = useState('');
@@ -129,15 +141,26 @@ export const LoginForm: React.FC<LoginFormProps> = ({ portal }) => {
       const data = await authService.login({
         identifier: identifier.trim(),
         password,
-        expected_role: config.expectedRole,
+        ...(config.expectedRole ? { expected_role: config.expectedRole } : {}),
       });
+
+      const officialDestinations: Partial<Record<UserRole, string>> = {
+        AUTHORITY: '/authority',
+        OFFICER: '/officer',
+        SUPER_ADMIN: '/admin',
+      };
+      const officialDestination = portal === 'official' ? officialDestinations[data.user.role] : undefined;
+      if (portal === 'official' && !officialDestination) {
+        setErrorMessage('ഈ അക്കൗണ്ടിന് ഔദ്യോഗിക പോർട്ടൽ പ്രവേശനാനുമതിയില്ല. (This account has no official portal access.)');
+        return;
+      }
 
       setAuth(data.user, data.accessToken, data.refreshToken);
       const routeState = location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null;
       const intendedPath = routeState?.from?.pathname;
       const destination = intendedPath?.startsWith('/') && !intendedPath.startsWith('//')
         ? `${intendedPath}${routeState?.from?.search ?? ''}${routeState?.from?.hash ?? ''}`
-        : config.redirectUrl;
+        : officialDestination ?? config.redirectUrl;
       navigate(destination, { replace: true });
     } catch (err: any) {
       setErrorMessage(err.message || 'ലോഗിൻ പരാജയപ്പെട്ടു. വിവരങ്ങൾ ശരിയാണോ എന്ന് പരിശോധിക്കുക.');
@@ -147,6 +170,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ portal }) => {
   };
 
   const handleApplyDemoCredentials = () => {
+    if (!config.demoUser) return;
     setIdentifier(config.demoUser.identifier);
     // Provide a sample test password
     if (portal === 'community') setPassword('StrongPassword123!');
@@ -240,7 +264,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ portal }) => {
             </form>
 
             {/* Quick Demo Pre-fill for Ease of Evaluation */}
-            <div className="mt-5 pt-4 border-t border-slate-100">
+            {config.demoUser && <div className="mt-5 pt-4 border-t border-slate-100">
               <button
                 type="button"
                 onClick={handleApplyDemoCredentials}
@@ -254,42 +278,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ portal }) => {
                   ഡെമോ വിവരങ്ങൾ
                 </span>
               </button>
-            </div>
+            </div>}
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-3 pt-2 text-center text-xs text-slate-500 border-t border-slate-100 bg-slate-50/50 rounded-b-xl">
             {portal === 'community' ? (
-              <div>
-                അക്കൗണ്ട് ഇല്ലേ?{' '}
-                <Link to="/register" className="font-semibold text-[#087C63] hover:underline">
-                  ഇവിടെ സൗജന്യമായി രജിസ്റ്റർ ചെയ്യാം
-                </Link>
-              </div>
+              <>
+                <div>അക്കൗണ്ട് ഇല്ലേ?{' '}<Link to="/register" className="font-semibold text-[#087C63] hover:underline">ഇവിടെ സൗജന്യമായി രജിസ്റ്റർ ചെയ്യാം</Link></div>
+                <a href={(import.meta as any).env?.VITE_OFFICIAL_PORTAL_URL || '/official/login'} className="font-semibold text-slate-600 hover:text-slate-900">ഔദ്യോഗിക പ്രവേശനം · Official Access</a>
+              </>
+            ) : portal === 'official' ? (
+              <a href={publicSiteUrl} className="font-semibold text-slate-600 hover:text-slate-900">പൊതു വെബ്‌സൈറ്റിലേക്ക് മടങ്ങുക · Return to public website</a>
             ) : null}
-
-            <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] text-slate-500">
-              <span>മറ്റ് പോർട്ടലുകൾ:</span>
-              {portal !== 'community' && (
-                <Link to="/login/community" className="text-emerald-700 hover:underline">
-                  പൗരൻ
-                </Link>
-              )}
-              {portal !== 'authority' && (
-                <Link to="/login/authority" className="text-blue-700 hover:underline">
-                  അധികാരി
-                </Link>
-              )}
-              {portal !== 'officer' && (
-                <Link to="/login/officer" className="text-amber-700 hover:underline">
-                  ഫീൽഡ് ഓഫീസർ
-                </Link>
-              )}
-              {portal !== 'admin' && (
-                <Link to="/login/admin" className="text-purple-700 hover:underline">
-                  സിസ്റ്റം അഡ്മിൻ
-                </Link>
-              )}
-            </div>
           </CardFooter>
         </Card>
       </div>

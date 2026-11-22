@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import {
   CheckCircle2,
   LogOut,
@@ -33,6 +33,58 @@ function LandingPage() {
       <LandingSections />
     </>
   );
+}
+
+function OfficialDashboardEntry() {
+  const { user, isAuthenticated } = useAuthStore();
+  if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
+  const destinationByRole = {
+    AUTHORITY: '/authority',
+    OFFICER: '/officer',
+    SUPER_ADMIN: '/admin',
+  } as const;
+  return <Navigate to={destinationByRole[user.role as keyof typeof destinationByRole] ?? '/login'} replace />;
+}
+
+function PublicRoutes() {
+  return <Routes>
+    <Route path="/" element={<LandingPage />} />
+    <Route path="/about" element={<Navigate to="/#about" replace />} />
+    <Route path="/how-it-works" element={<Navigate to="/#how" replace />} />
+    <Route path="/environmental-issues" element={<Navigate to="/#issues" replace />} />
+    <Route path="/contact" element={<Navigate to="/#contact" replace />} />
+    <Route path="/map" element={<IssueMap />} />
+    <Route path="/public-map" element={<Navigate to="/map" replace />} />
+    <Route path="/design-system" element={<DesignShowcase />} />
+    <Route path="/login" element={<LoginForm portal="community" />} />
+    <Route path="/login/community" element={<LoginForm portal="community" />} />
+    <Route path="/register" element={<RegisterForm />} />
+    <Route path="/track" element={<ComplaintTracker />} />
+    <Route path="/track/:trackingCode" element={<ComplaintTracker />} />
+    <Route path="/track-complaint" element={<Navigate to="/track" replace />} />
+    <Route path="/complaints/:id" element={<ComplaintDetail />} />
+    <Route path="/community" element={<ProtectedRoute allowedRoles={['COMMUNITY']}><CitizenDashboard /></ProtectedRoute>} />
+    <Route path="/community/dashboard" element={<ProtectedRoute allowedRoles={['COMMUNITY']}><CitizenDashboard /></ProtectedRoute>} />
+    <Route path="/community/report" element={<ProtectedRoute allowedRoles={['COMMUNITY']}><ComplaintWizard /></ProtectedRoute>} />
+    <Route path="/community/my-reports" element={<ProtectedRoute allowedRoles={['COMMUNITY']}><MyReports /></ProtectedRoute>} />
+    <Route path="*" element={<Navigate to="/" replace />} />
+  </Routes>;
+}
+
+function OfficialRoutes() {
+  return <Routes>
+    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+    <Route path="/dashboard" element={<OfficialDashboardEntry />} />
+    <Route path="/login" element={<LoginForm portal="official" />} />
+    <Route path="/login/*" element={<Navigate to="/login" replace />} />
+    <Route path="/register" element={<Navigate to="/login" replace />} />
+    <Route path="/authority" element={<ProtectedRoute allowedRoles={['AUTHORITY', 'SUPER_ADMIN']} fallbackLoginRoute="/login"><AuthorityDashboard /></ProtectedRoute>} />
+    <Route path="/officer" element={<ProtectedRoute allowedRoles={['OFFICER', 'SUPER_ADMIN']} fallbackLoginRoute="/login"><OfficerTaskList /></ProtectedRoute>} />
+    <Route path="/admin" element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} fallbackLoginRoute="/login"><AdminDashboard /></ProtectedRoute>} />
+    <Route path="/analytics" element={<ProtectedRoute allowedRoles={['AUTHORITY', 'SUPER_ADMIN']} fallbackLoginRoute="/login"><AnalyticsDashboard /></ProtectedRoute>} />
+    <Route path="/map" element={<ProtectedRoute allowedRoles={['AUTHORITY', 'OFFICER', 'SUPER_ADMIN']} fallbackLoginRoute="/login"><IssueMap /></ProtectedRoute>} />
+    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+  </Routes>;
 }
 // Protected Portal Layout Preview for Phase 04 Verification
 export function PortalDashboardView({
@@ -170,80 +222,19 @@ export function PortalDashboardView({
 }
 
 export default function App() {
+  const envSurface = (import.meta as any).env?.VITE_APP_SURFACE?.toLowerCase();
+  const host = window.location.hostname.toLowerCase();
+  const officialRootSurface = envSurface === 'official' || host.startsWith('portal.');
+  const localOfficialPrefix = !officialRootSurface && (window.location.pathname === '/official' || window.location.pathname.startsWith('/official/'));
+  const officialSurface = officialRootSurface || localOfficialPrefix;
+  const routerBase = localOfficialPrefix ? '/official' : undefined;
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={routerBase}>
       <SkipToContent />
       <AlertBanner />
       <main id="main-content" tabIndex={-1} className="outline-none">
-        <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/map" element={<IssueMap />} />
-        <Route path="/analytics" element={<AnalyticsDashboard />} />
-        <Route path="/design-system" element={<DesignShowcase />} />
-
-        {/* Auth Routes */}
-        <Route path="/login/community" element={<LoginForm portal="community" />} />
-        <Route path="/login/authority" element={<LoginForm portal="authority" />} />
-        <Route path="/login/officer" element={<LoginForm portal="officer" />} />
-        <Route path="/login/admin" element={<LoginForm portal="admin" />} />
-        <Route path="/register" element={<RegisterForm />} />
-
-        {/* Tracking & Complaint Detail Routes */}
-        <Route path="/track" element={<ComplaintTracker />} />
-        <Route path="/track/:trackingCode" element={<ComplaintTracker />} />
-        <Route path="/complaints/:id" element={<ComplaintDetail />} />
-
-        {/* Protected Community Portal */}
-        <Route
-          path="/community"
-          element={
-            <ProtectedRoute allowedRoles={['COMMUNITY']}>
-              <CitizenDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/community/report"
-          element={
-            <ProtectedRoute allowedRoles={['COMMUNITY']}>
-              <ComplaintWizard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/community/my-reports"
-          element={
-            <ProtectedRoute allowedRoles={['COMMUNITY']}>
-              <MyReports />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/authority"
-          element={
-            <ProtectedRoute allowedRoles={['AUTHORITY', 'SUPER_ADMIN']} fallbackLoginRoute="/login/authority">
-              <AuthorityDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/officer"
-          element={
-            <ProtectedRoute allowedRoles={['OFFICER', 'SUPER_ADMIN']} fallbackLoginRoute="/login/officer">
-              <OfficerTaskList />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRoles={['SUPER_ADMIN']} fallbackLoginRoute="/login/admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+        {officialSurface ? <OfficialRoutes /> : <PublicRoutes />}
       </main>
     </BrowserRouter>
   );

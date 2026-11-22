@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { ArrowDown, ArrowRight, Building2, HardHat, Leaf, LogOut, Menu, ShieldCheck, Users, X, MapPin, Recycle, Droplets, Waves, CloudRain, CircleHelp, BarChart3 } from 'lucide-react';
+import { ArrowDown, ArrowRight, Leaf, LogOut, Menu, X, MapPin, Recycle, Droplets, Waves, CloudRain, CircleHelp } from 'lucide-react';
 import { Logo } from '../../components/common/Logo';
 import { LanguageSwitcher, Language } from '../../components/common/LanguageSwitcher';
 import { useAuthStore } from '../../store/authStore';
@@ -34,7 +34,8 @@ export function HeroSection() {
     body: translate('hero.body'), report: translate('hero.report'), how: translate('hero.how'),
   };
   const transition = (delay: number) => reducedMotion ? { duration: 0 } : { duration: 0.6, delay, ease: 'easeOut' as const };
-  const links = ['#home', '#about', '#how', '#issues', '#contact'];
+  const links = ['#home', '#about', '#how', '#issues', '/map', '#contact'];
+  const officialPortalUrl = (import.meta as any).env?.VITE_OFFICIAL_PORTAL_URL || '/official/login';
   const changeLanguage = (next: Language) => { setLanguage(next); void i18n.changeLanguage(next); };
 
   useEffect(() => {
@@ -46,17 +47,20 @@ export function HeroSection() {
     <header className="relative z-30 flex shrink-0 items-center justify-between px-5 py-4 md:px-12 md:py-5 lg:px-20">
       <Logo height={40} className="h-9 md:h-11" />
       <nav lang={language} aria-label="Main navigation" className="hidden items-center gap-5 text-sm text-muted-foreground lg:flex xl:gap-7">
-        {t.nav.map((label, i) => <a key={label} href={links[i]} className="whitespace-nowrap transition-colors hover:text-primary">{label}</a>)}
+        {t.nav.map((label, i) => i === 4
+          ? <Link key={label} to="/map" className="whitespace-nowrap transition-colors hover:text-primary">{label}</Link>
+          : <a key={label} href={links[i]} className="whitespace-nowrap transition-colors hover:text-primary">{label}</a>)}
       </nav>
       <div className="flex items-center gap-2 md:gap-3">
         {isAuthenticated && user && <div className="hidden items-center gap-2 md:flex"><span className="max-w-36 truncate text-xs text-muted-foreground">{user.fullName}</span><button type="button" onClick={() => logout()} aria-label={translate('hero.logout')} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-white/60 text-muted-foreground hover:text-primary"><LogOut size={15}/></button></div>}
         <div className="hidden sm:block"><LanguageSwitcher currentLang={language} onLanguageChange={changeLanguage} className="border-border/80 bg-background/80 text-foreground shadow-none"/></div>
+        <Link to="/login" className="hidden rounded-full border border-border bg-background/80 px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-muted sm:inline-flex">{translate('hero.signIn')}</Link>
         <button type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(v => !v)} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-background/80 text-foreground lg:hidden">{menuOpen ? <X size={18}/> : <Menu size={18}/>}</button>
         <button type="button" onClick={() => navigate('/community/report')} className="hidden rounded-full bg-primary px-4 py-2.5 text-xs font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90 sm:inline-flex md:px-5 md:text-sm">{language === 'ml' ? 'റിപ്പോർട്ട് ചെയ്യുക' : 'Report an Issue'}</button>
       </div>
       <AnimatePresence>{menuOpen && <motion.div initial={reducedMotion ? false : {opacity:0,y:-8}} animate={{opacity:1,y:0}} exit={reducedMotion ? undefined : {opacity:0,y:-8}} transition={{duration:reducedMotion ? 0 : .18}} className="absolute left-4 right-4 top-[calc(100%-4px)] z-40 rounded-2xl border border-border bg-background/95 p-3 shadow-xl backdrop-blur-xl lg:hidden">
-        <nav lang={language} className="flex flex-col">{t.nav.map((label,i)=><a key={label} href={links[i]} onClick={()=>setMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted">{label}</a>)}</nav>
-        <div className="mt-2 flex items-center justify-between border-t border-border pt-3"><LanguageSwitcher currentLang={language} onLanguageChange={changeLanguage}/><div className="flex items-center gap-2">{isAuthenticated && user && <button type="button" onClick={() => logout()} className="rounded-full border border-border px-3 py-2 text-[11px] text-muted-foreground">{language === 'ml' ? 'ലോഗ് ഔട്ട്' : 'Log out'}</button>}<button type="button" onClick={()=>navigate('/community/report')} className="rounded-full bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground">{t.report}</button></div></div>
+        <nav lang={language} className="flex flex-col">{t.nav.map((label,i)=>i===4?<Link key={label} to="/map" onClick={()=>setMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted">{label}</Link>:<a key={label} href={links[i]} onClick={()=>setMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted">{label}</a>)}</nav>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3"><LanguageSwitcher currentLang={language} onLanguageChange={changeLanguage}/><div className="flex flex-wrap items-center gap-2">{isAuthenticated && user && <button type="button" onClick={() => logout()} className="rounded-full border border-border px-3 py-2 text-[11px] text-muted-foreground">{translate('hero.logout')}</button>}<Link to="/login" onClick={()=>setMenuOpen(false)} className="rounded-full border border-border px-3 py-2 text-[11px] font-semibold text-foreground">{translate('hero.signIn')}</Link><a href={officialPortalUrl} className="rounded-full border border-border px-3 py-2 text-[11px] font-semibold text-muted-foreground">{translate('hero.officialAccess')}</a><button type="button" onClick={()=>navigate('/community/report')} className="rounded-full bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground">{t.report}</button></div></div>
       </motion.div>}</AnimatePresence>
     </header>
 
@@ -69,7 +73,6 @@ export function HeroSection() {
       <motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={transition(.3)} className="mt-4 flex w-full flex-col justify-center gap-2 sm:w-auto sm:flex-row sm:gap-3 md:mt-5">
         <button type="button" onClick={() => navigate('/community/report')} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:bg-primary/90"><Leaf size={16}/>{t.report}<ArrowRight size={15}/></button>
         <button type="button" onClick={() => navigate('/map')} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-emerald-300 bg-white/80 px-6 py-2.5 text-sm font-semibold text-emerald-800 shadow-sm backdrop-blur transition hover:bg-white hover:text-emerald-900"><MapPin size={16}/>{translate('hero.liveMap')}</button>
-        <button type="button" onClick={() => navigate('/analytics')} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-blue-200 bg-white/80 px-5 py-2.5 text-sm font-semibold text-blue-800 shadow-sm backdrop-blur transition hover:bg-white hover:text-blue-900"><BarChart3 size={16}/>{language === 'ml' ? 'അനലിറ്റിക്സ്' : 'Analytics'}</button>
         <a href="#how" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border bg-white/55 px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur transition hover:bg-white/85"><ArrowDown size={15}/>{t.how}</a>
       </motion.div>
       <motion.div initial={{opacity:0,y:30}} animate={{opacity:1,y:0}} transition={reducedMotion?{duration:0}:{duration:.8,delay:.5,ease:'easeOut'}} className="mt-5 w-full max-w-5xl shrink-0 pb-8 sm:mt-7 md:mt-8">
@@ -82,36 +85,14 @@ export function HeroSection() {
 
 export function LandingSections() {
   const { t: translate } = useTranslation();
+  const officialPortalUrl = (import.meta as any).env?.VITE_OFFICIAL_PORTAL_URL || '/official/login';
   const steps = translate('landing.steps', { returnObjects: true }) as Array<{ title: string; body: string }>;
-  const portals = translate('landing.portals', { returnObjects: true }) as Array<{ title: string; subtitle: string; description: string; action: string }>;
   const categories = translate('landing.categories', { returnObjects: true }) as Array<{ title: string; description: string }>;
   return <div className="bg-background">
     <section id="about" className="mx-auto max-w-6xl px-5 py-16 md:px-6 md:py-24"><p className="text-xs font-semibold uppercase tracking-[.2em] text-primary">NAAM · നാം</p><h2 lang="ml" className="ml-display mt-3 max-w-2xl text-3xl font-bold leading-[1.4] text-foreground md:text-4xl">{translate('landing.aboutTitle')}</h2><p className="mt-4 max-w-2xl text-sm leading-[1.8] text-muted-foreground md:text-base">{translate('landing.aboutBody')}</p></section>
     <section id="how" className="border-y border-border bg-muted/40"><div className="mx-auto max-w-6xl px-5 py-14 md:px-6 md:py-20"><div className="mb-8 max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[.18em] text-primary">{translate('landing.workflowLabel')}</p><h2 className="ml-display mt-2 text-2xl font-bold leading-[1.4] text-foreground md:text-3xl">{translate('landing.workflowTitle')}</h2><p className="mt-2 text-sm leading-[1.8] text-muted-foreground">{translate('landing.workflowIntro')}</p></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{steps.map(({title,body},i)=><article key={title} className="relative rounded-2xl border border-border bg-background p-5 shadow-sm"><span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 text-sm font-bold text-primary">0{i+1}</span><h3 className="ml-display mt-4 text-lg font-semibold leading-[1.5] text-foreground">{title}</h3><p className="mt-2 text-sm leading-[1.8] text-muted-foreground">{body}</p></article>)}</div></div></section>
-    <section id="portals" className="mx-auto max-w-6xl px-6 py-14 md:py-20">
-      <div className="max-w-2xl">
-        <p className="text-xs font-semibold uppercase tracking-[.18em] text-primary">{translate('landing.portalLabel')}</p>
-        <h2 className="ml-display mt-3 text-2xl font-bold leading-[1.45] text-foreground md:text-3xl">{translate('landing.portalTitle')}</h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{translate('landing.portalIntro')}</p>
-      </div>
-      <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { Icon: Users, to: '/login/community', tone: 'bg-primary/10 text-primary' },
-          { Icon: Building2, to: '/login/authority', tone: 'bg-accent/10 text-accent' },
-          { Icon: HardHat, to: '/login/officer', tone: 'bg-warning/10 text-warning' },
-          { Icon: ShieldCheck, to: '/login/admin', tone: 'bg-violet-100 text-violet-800' },
-        ].map(({ Icon, to, tone }, index) => (
-          <Link key={to} to={to} className="group flex min-h-56 flex-col rounded-2xl border border-border bg-background p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/35 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-            <span className={`grid h-11 w-11 place-items-center rounded-xl ${tone}`}><Icon size={20}/></span>
-            <h3 className="ml-display mt-4 text-base font-bold leading-[1.5] text-foreground">{portals[index].title}</h3>
-            <p className="mt-0.5 text-xs font-medium text-muted-foreground">{portals[index].subtitle}</p>
-            <p className="mt-3 flex-1 text-xs leading-relaxed text-muted-foreground">{portals[index].description}</p>
-            <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-primary">{portals[index].action} <ArrowRight size={13} className="transition-transform group-hover:translate-x-1"/></span>
-          </Link>
-        ))}
-      </div>
-    </section>
+    <section id="participate" className="bg-primary text-primary-foreground"><div className="mx-auto flex max-w-6xl flex-col gap-5 px-5 py-12 md:flex-row md:items-center md:justify-between md:px-6 md:py-16"><div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[.18em] text-white/75">NAAM · COMMUNITY</p><h2 className="ml-display mt-2 text-2xl font-bold leading-[1.45] md:text-3xl">{translate('landing.joinTitle')}</h2><p className="mt-2 text-sm leading-[1.8] text-white/85">{translate('landing.joinBody')}</p></div><div className="flex flex-wrap gap-3"><Link to="/register" className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-primary transition hover:bg-white/90">{translate('landing.register')}</Link><Link to="/community/report" className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/50 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">{translate('landing.report')}</Link></div></div></section>
     <section id="issues" className="mx-auto max-w-6xl px-5 py-14 md:px-6 md:py-20"><div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[.18em] text-primary">{translate('landing.issueLabel')}</p><h2 className="ml-display mt-2 text-2xl font-bold leading-[1.45] text-foreground md:text-3xl">{translate('landing.issueTitle')}</h2><p className="mt-2 text-sm leading-[1.8] text-muted-foreground">{translate('landing.issueIntro')}</p></div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{[{Icon:Recycle,color:'text-primary bg-primary/10',code:'WASTE'}, {Icon:Droplets,color:'text-accent bg-accent/10',code:'WATER_POLLUTION'}, {Icon:Waves,color:'text-secondary bg-secondary/10',code:'DRAINAGE'}, {Icon:CloudRain,color:'text-brand-blue bg-brand-blue/10',code:'FLOODING'}, {Icon:CircleHelp,color:'text-muted-foreground bg-muted',code:'OTHER'}].map(({Icon,color,code},index)=><Link key={categories[index].title} to={`/community/report?category=${code}`} className="group rounded-2xl border border-border bg-background p-4 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><span className={`grid h-10 w-10 place-items-center rounded-xl ${color}`}><Icon size={19}/></span><h3 className="ml-display mt-3 text-sm font-semibold leading-[1.5] text-foreground">{categories[index].title}</h3><p className="mt-1 text-xs leading-[1.7] text-muted-foreground">{categories[index].description}</p><span className="mt-3 inline-flex text-xs font-semibold text-primary">{translate('landing.report')}<ArrowRight size={13} className="ml-1 transition-transform group-hover:translate-x-1"/></span></Link>)}</div></section>
-    <footer id="contact" className="border-t border-border bg-white/60"><div className="mx-auto flex max-w-6xl flex-col justify-between gap-5 px-6 py-8 md:flex-row md:items-center"><div><Logo height={34}/><p className="mt-2 text-xs text-muted-foreground">People's Environmental Monitoring and Resolution Platform · Kerala</p></div><div className="flex flex-wrap gap-3 text-xs text-muted-foreground"><Link to="/map" className="font-semibold text-emerald-700 hover:text-emerald-800">Live Map</Link><Link to="/analytics" className="font-semibold text-blue-700 hover:text-blue-800">Analytics</Link><Link to="/login/community" className="hover:text-primary">Community</Link><Link to="/login/authority" className="hover:text-primary">Authority</Link><Link to="/login/officer" className="hover:text-primary">Field Officer</Link><Link to="/login/admin" className="hover:text-primary">Admin</Link><Link to="/design-system" className="hover:text-primary">Design system</Link></div></div></footer>
+    <footer id="contact" className="border-t border-border bg-white/60"><div className="mx-auto flex max-w-6xl flex-col justify-between gap-5 px-5 py-8 md:flex-row md:items-center md:px-6"><div><Logo height={34}/><p className="mt-2 text-xs text-muted-foreground">People's Environmental Monitoring and Resolution Platform · Kerala</p></div><nav aria-label="Footer" className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground"><a href="#about" className="hover:text-primary">About</a><a href="#how" className="hover:text-primary">How it works</a><a href="#issues" className="hover:text-primary">Issues</a><Link to="/map" className="font-semibold text-primary hover:text-primary/80">Public Map</Link><Link to="/login" className="hover:text-primary">Sign in</Link><Link to="/register" className="hover:text-primary">Register</Link><a href={officialPortalUrl} className="font-semibold text-foreground hover:text-primary">{translate('hero.officialAccess')}</a></nav></div></footer>
   </div>;
 }
