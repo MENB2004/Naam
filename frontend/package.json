@@ -19,6 +19,7 @@
     "i18next": "^23.15.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.441.0",
+    "naam-root": "file:..",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.0",
@@ -48,6 +49,7 @@
     "vite": "^5.4.3"
   },
   "overrides": {
-    "rollup": "npm:@rollup/wasm-node"
+    "rollup": "npm:@rollup/wasm-node",
+    "esbuild": "^0.25.0"
   }
 }
