@@ -9,7 +9,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
-    "postinstall": "node -e \"const fs=require('fs'); const p='node_modules/rollup/dist/native.js'; if(fs.existsSync(p)) fs.writeFileSync(p, \\\"module.exports = require('@rollup/wasm-node/dist/native.js');\\\\n\\\");\""
+    "postinstall": "node -e \"const fs=require('fs'); const p='node_modules/rollup/dist/native.js'; if(fs.existsSync(p)) fs.writeFileSync(p, \\\"module.exports = require('@rollup/wasm-node/dist/native.js');\\\");\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
