@@ -2,13 +2,13 @@ import uuid
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.api.deps import require_role
 from app.core.database import get_db
 from app.models.alert import Alert, Notification
 from app.models.auth import User
-from app.schemas.alert import AlertCreate, AlertOut
+from app.schemas.alert import AlertCreate, AlertOut, PublicAlertOut
 from app.schemas.auth import UserProfile
 
 router = APIRouter()
@@ -17,7 +17,7 @@ VALID_ALERT_SOURCES = ["OFFICIAL_WARNING", "COMMUNITY_REPORT", "SIMULATED_DEMO_A
 VALID_ALERT_LEVELS = ["INFO", "WARNING", "CRITICAL"]
 
 
-@router.get("", response_model=list[AlertOut])
+@router.get("", response_model=list[PublicAlertOut])
 def get_active_alerts(
     district: str | None = Query(None, description="Filter by affected district"),
     include_all: bool = Query(False, description="Include inactive/expired alerts if true"),
@@ -28,7 +28,11 @@ def get_active_alerts(
     Sorted by severity (CRITICAL first) and creation date.
     """
     now = datetime.now(UTC)
-    query = db.query(Alert).options(joinedload(Alert.creator))
+    query = db.query(Alert)
+
+    # Only authority-issued warnings are public announcements. Community and
+    # simulated alerts stay internal and are never presented as official news.
+    query = query.filter(Alert.alert_source == "OFFICIAL_WARNING")
 
     if not include_all:
         query = query.filter(Alert.is_active == True)
@@ -51,7 +55,7 @@ def get_active_alerts(
     results = []
     for a in alerts:
         results.append(
-            AlertOut(
+            PublicAlertOut(
                 id=a.id,
                 title_ml=a.title_ml,
                 title_en=a.title_en,
@@ -61,8 +65,6 @@ def get_active_alerts(
                 alert_source=a.alert_source,
                 affected_district=a.affected_district,
                 is_active=a.is_active,
-                created_by=a.created_by,
-                creator_name=a.creator.full_name if a.creator else None,
                 expires_at=a.expires_at,
                 created_at=a.created_at,
             )

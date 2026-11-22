@@ -29,16 +29,21 @@
 - Node.js 22+ & npm 10+
 - Python 3.12+
 - Astral uv
-- PostgreSQL 16 with PostGIS extension
+- PostgreSQL 16 with PostGIS extension for full local database use (backend tests use SQLite)
 
 ### Backend Setup
 ```powershell
 cd backend
-uv venv
+uv sync --group dev
 .\.venv\Scripts\Activate.ps1
-uv pip install -e .
 uv run uvicorn app.main:app --reload --port 8000
 ```
+
+Copy `backend/.env.example` to `backend/.env.local`, then set a local database URL
+and a development `SECRET_KEY`. The backend uses the synchronous `pg8000` driver
+for PostgreSQL; the included SQLite test suite does not require PostGIS.
+For a fresh database, create the schema and seed required roles/departments with
+`uv run python scripts/seed_master_data.py`, then apply outstanding migrations.
 
 ### Frontend Setup
 ```powershell
@@ -49,6 +54,23 @@ npm run dev
 
 Visit the application at: `http://localhost:5173`
 API documentation at: `http://localhost:8000/docs`
+
+### Checks
+
+```powershell
+cd backend
+uv run pytest -q
+uv run ruff check app migrations tests
+
+cd ..\frontend
+npm ci
+npm run type-check
+npm run lint
+npm run build
+```
+
+When upgrading an existing database, apply outstanding Alembic migrations with
+`uv run alembic upgrade head` after configuring `DATABASE_URL`.
 
 ## 4. Documentation
 Comprehensive architecture, schema specifications, and phase plans are located in the [`docs/`](./docs/) directory.

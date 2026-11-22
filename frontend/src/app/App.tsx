@@ -25,13 +25,16 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { HeroSection, LandingSections } from '../features/landing/HeroSection';
+import { PublicSummaryProvider } from '../features/landing/PublicSummaryContext';
+import { CommunityProfile } from '../features/community/CommunityProfile';
+import { PasswordRecoveryNotice, PrivacyNotice } from '../features/auth/AccountNotices';
 
 function LandingPage() {
   return (
-    <>
+    <PublicSummaryProvider>
       <HeroSection />
       <LandingSections />
-    </>
+    </PublicSummaryProvider>
   );
 }
 
@@ -59,14 +62,17 @@ function PublicRoutes() {
     <Route path="/login" element={<LoginForm portal="community" />} />
     <Route path="/login/community" element={<LoginForm portal="community" />} />
     <Route path="/register" element={<RegisterForm />} />
+    <Route path="/privacy" element={<PrivacyNotice />} />
+    <Route path="/forgot-password" element={<PasswordRecoveryNotice />} />
     <Route path="/track" element={<ComplaintTracker />} />
     <Route path="/track/:trackingCode" element={<ComplaintTracker />} />
     <Route path="/track-complaint" element={<Navigate to="/track" replace />} />
-    <Route path="/complaints/:id" element={<ComplaintDetail />} />
+    <Route path="/complaints/:id" element={<ProtectedRoute allowedRoles={['COMMUNITY', 'AUTHORITY', 'OFFICER', 'SUPER_ADMIN']}><ComplaintDetail /></ProtectedRoute>} />
     <Route path="/community" element={<ProtectedRoute allowedRoles={['COMMUNITY']}><CitizenDashboard /></ProtectedRoute>} />
     <Route path="/community/dashboard" element={<ProtectedRoute allowedRoles={['COMMUNITY']}><CitizenDashboard /></ProtectedRoute>} />
     <Route path="/community/report" element={<ProtectedRoute allowedRoles={['COMMUNITY']}><ComplaintWizard /></ProtectedRoute>} />
     <Route path="/community/my-reports" element={<ProtectedRoute allowedRoles={['COMMUNITY']}><MyReports /></ProtectedRoute>} />
+    <Route path="/community/profile" element={<ProtectedRoute allowedRoles={['COMMUNITY']}><CommunityProfile /></ProtectedRoute>} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>;
 }

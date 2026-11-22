@@ -189,9 +189,13 @@ def test_get_nearby_complaints_proximity(client: TestClient, map_seed_data):
     points = res_nearby.json()
     assert len(points) >= 1
     closest = points[0]
-    assert closest["title"] == "Marine Drive Waste Accumulation"
-    assert closest["distance_km"] <= 0.1  # Virtually 0 distance
-    assert closest["thumbnail_url"] is not None
+    assert closest["category"] == "WASTE"
+    assert "title" not in closest
+    assert "tracking_code" not in closest
+    assert "distance_km" not in closest
+    assert "thumbnail_url" not in closest
+    assert closest["latitude"] == round(closest["latitude"], 2)
+    assert closest["longitude"] == round(closest["longitude"], 2)
 
 
 def test_get_nearby_out_of_kerala_rejected(client: TestClient):

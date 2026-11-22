@@ -12,6 +12,7 @@ export interface UserProfile {
   departmentNameMl?: string | null;
   isActive: boolean;
   isVerified?: boolean;
+  locality?: string | null;
 }
 
 export interface AuthTokens {
@@ -31,6 +32,8 @@ export interface RegisterPayload {
   email: string;
   phone?: string;
   password: string;
+  locality?: string;
+  privacy_consent: boolean;
 }
 
 export interface AuthResponse {
@@ -48,5 +51,6 @@ export interface AuthResponse {
     department_id?: string | null;
     department_name_ml?: string | null;
     is_active: boolean;
+    locality?: string | null;
   };
 }

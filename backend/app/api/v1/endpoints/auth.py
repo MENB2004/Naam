@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -22,12 +23,19 @@ from app.schemas.auth import (
     TokenResponse,
     UserLogin,
     UserProfile,
+    UserProfileUpdate,
     UserRegister,
 )
 
 router = APIRouter()
 
 
+@router.post(
+    "/community/register",
+    response_model=TokenResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["Authentication"],
+)
 @router.post(
     "/register",
     response_model=TokenResponse,
@@ -63,6 +71,8 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
         is_active=True,
         is_verified=False,
         preferred_language=user_in.preferred_language or "ml",
+        locality=user_in.locality.strip() if user_in.locality else None,
+        privacy_consent_at=datetime.now(UTC),
     )
     db.add(user)
     db.flush()
@@ -86,6 +96,7 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
         role_display_en=role.display_name_en if role else "Citizen",
         is_active=user.is_active,
         preferred_language=user.preferred_language,
+        locality=user.locality,
     )
 
     token_data = {"sub": str(user.id), "role": profile.role}
@@ -152,6 +163,7 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
         department_name_en=dept_name_en,
         is_active=user.is_active,
         preferred_language=getattr(user, "preferred_language", "ml") or "ml",
+        locality=user.locality,
     )
 
     token_data = {"sub": str(user.id), "role": role_name}
@@ -222,4 +234,32 @@ def refresh(refresh_in: RefreshTokenRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserProfile, tags=["Authentication"])
 def get_me(current_user: UserProfile = Depends(get_current_user)):
     """Retrieve profile and permissions of the currently authenticated user."""
+    return current_user
+
+
+@router.patch("/me/profile", response_model=UserProfile, tags=["Authentication"])
+def update_my_profile(
+    profile_in: UserProfileUpdate,
+    current_user: UserProfile = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update basic profile fields for the authenticated community member."""
+    if current_user.role != "COMMUNITY":
+        raise HTTPException(status_code=403, detail="Only community accounts can edit this profile")
+    user = db.scalars(select(User).where(User.id == current_user.id)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    phone = profile_in.phone.strip() if profile_in.phone else None
+    if phone:
+        existing = db.scalars(select(User).where(User.phone == phone, User.id != user.id)).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Phone number already registered")
+    user.full_name = profile_in.full_name.strip()
+    user.phone = phone
+    user.locality = profile_in.locality.strip() if profile_in.locality else None
+    db.commit()
+    db.refresh(user)
+    current_user.full_name = user.full_name
+    current_user.phone = user.phone
+    current_user.locality = user.locality
     return current_user

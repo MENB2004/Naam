@@ -275,6 +275,7 @@ def list_public_complaints(
 def get_complaint_by_id(
     complaint_id: uuid.UUID,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """Retrieve full details of a specific complaint by UUID."""
     stmt = (
@@ -294,6 +295,9 @@ def get_complaint_by_id(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="പരാതി കണ്ടെത്തിയില്ല (Complaint not found)",
         )
+    role_name = getattr(current_user.role, "name", current_user.role)
+    if role_name == "COMMUNITY" and complaint.reporter_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint not found")
     return serialize_complaint(complaint)
 
 
@@ -303,8 +307,15 @@ def get_complaint_by_id(
 def get_complaint_timeline(
     complaint_id: uuid.UUID,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """Retrieve chronological audit timeline updates for a complaint."""
+    complaint = db.scalars(select(Complaint).where(Complaint.id == complaint_id)).first()
+    if not complaint:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint not found")
+    role_name = getattr(current_user.role, "name", current_user.role)
+    if role_name == "COMMUNITY" and complaint.reporter_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint not found")
     stmt = (
         select(ComplaintUpdate)
         .options(selectinload(ComplaintUpdate.author))

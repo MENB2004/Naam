@@ -133,7 +133,10 @@ def test_full_complaint_lifecycle(client):
     assert resolve_res.json()["current_status"] == "RESOLVED"
 
     # 6. Verify audit timeline history
-    timeline_res = client.get(f"/api/v1/complaints/{complaint_id}/timeline")
+    timeline_res = client.get(
+        f"/api/v1/complaints/{complaint_id}/timeline",
+        headers={"Authorization": f"Bearer {authority_token}"},
+    )
     assert timeline_res.status_code == 200
     timeline = timeline_res.json()
     assert len(timeline) >= 5

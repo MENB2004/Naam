@@ -97,6 +97,9 @@ def test_authority_broadcast_alert_and_user_receives_notification(client: TestCl
     assert public_res.status_code == 200
     alerts = public_res.json()
     assert any(a["id"] == alert_id for a in alerts)
+    public_alert = next(a for a in alerts if a["id"] == alert_id)
+    assert "created_by" not in public_alert
+    assert "creator_name" not in public_alert
 
     # Citizen receives in-app broadcast notification
     notif_res = client.get(

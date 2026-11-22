@@ -1,13 +1,13 @@
+import hashlib
 import math
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi import status as http_status
-from sqlalchemy import func
+from sqlalchemy import case, func
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
-from app.models.complaint import Complaint, Evidence
-from app.models.department import Department
+from app.models.complaint import Complaint
 from app.models.location import Location
 from app.schemas.complaint import (
     CATEGORY_ML_MAP,
@@ -48,7 +48,11 @@ def get_public_map_summary(db: Session = Depends(get_db)):
     ).count()
     resolved = public_reports.filter(Complaint.current_status == "RESOLVED").count()
     category_counts = (
-        db.query(Complaint.category, func.count(Complaint.id))
+        db.query(
+            Complaint.category,
+            func.count(Complaint.id),
+            func.sum(case((Complaint.current_status.notin_(["RESOLVED", "REJECTED"]), 1), else_=0)),
+        )
         .join(Complaint.location)
         .filter(
             Complaint.is_public.is_(True),
@@ -78,14 +82,13 @@ def get_public_map_summary(db: Session = Depends(get_db)):
         "total_complaints": total,
         "active_complaints": active,
         "resolved_complaints": resolved,
-        "active_departments": db.query(Department).filter(Department.is_active.is_(True)).count(),
+        "active_categories": sum(1 for _, _, active_count in category_counts if active_count),
         "categories": [
-            {"category": category, "count": count} for category, count in category_counts
+            {"category": category, "count": count, "active_count": active_count or 0}
+            for category, count, active_count in category_counts
         ],
         "recent_reports": [
             {
-                "id": complaint.id,
-                "title": complaint.title,
                 "category": complaint.category,
                 "current_status": complaint.current_status,
                 "district": district,
@@ -107,19 +110,6 @@ def haversine_distance_km(lat1: float, lon1: float, lat2: float, lon2: float) ->
     )
     c = 2.0 * math.asin(math.sqrt(a))
     return r * c
-
-
-def get_first_image_url(evidence_list: list[Evidence]) -> str | None:
-    for ev in evidence_list:
-        if ev.file_type and ev.file_type.startswith("image/"):
-            return ev.file_url
-        if ev.file_url and any(
-            ev.file_url.lower().endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp"]
-        ):
-            return ev.file_url
-    if evidence_list:
-        return evidence_list[0].file_url
-    return None
 
 
 @router.get("/clusters", response_model=MapClustersResponse)
@@ -144,7 +134,6 @@ def get_map_clusters(
         .join(Complaint.location)
         .options(
             joinedload(Complaint.location),
-            joinedload(Complaint.evidence),
         )
         .filter(Complaint.is_public == True)
     )
@@ -189,26 +178,25 @@ def get_map_clusters(
         if not c.location:
             continue
 
-        thumb = get_first_image_url(c.evidence or [])
         cat_ml = CATEGORY_ML_MAP.get(c.category, c.category)
         st_ml = STATUS_ML_MAP.get(c.current_status, c.current_status)
+        latitude = round(c.location.latitude, 2)
+        longitude = round(c.location.longitude, 2)
+        public_id = hashlib.sha256(
+            f"{c.category}|{latitude:.2f}|{longitude:.2f}|{c.created_at.isoformat()}".encode()
+        ).hexdigest()[:16]
 
         mp = MapPoint(
-            id=c.id,
-            tracking_code=c.tracking_code,
-            title=c.title,
+            id=public_id,
             category=c.category,
             category_display_ml=cat_ml,
             severity=c.severity,
             current_status=c.current_status,
             status_display_ml=st_ml,
-            latitude=c.location.latitude,
-            longitude=c.location.longitude,
+            latitude=latitude,
+            longitude=longitude,
             district=c.location.district,
-            lsgd_name=c.location.lsgd_name,
-            ward_number=c.location.ward_number,
             created_at=c.created_at,
-            thumbnail_url=thumb,
         )
         points.append(mp)
 
@@ -216,22 +204,17 @@ def get_map_clusters(
             GeoJsonFeature(
                 geometry={
                     "type": "Point",
-                    "coordinates": [c.location.longitude, c.location.latitude],
+                    "coordinates": [longitude, latitude],
                 },
                 properties={
-                    "id": str(c.id),
-                    "tracking_code": c.tracking_code,
-                    "title": c.title,
+                    "id": public_id,
                     "category": c.category,
                     "category_display_ml": cat_ml,
                     "severity": c.severity,
                     "current_status": c.current_status,
                     "status_display_ml": st_ml,
                     "district": c.location.district,
-                    "lsgd_name": c.location.lsgd_name,
-                    "ward_number": c.location.ward_number,
                     "created_at": c.created_at.isoformat() if c.created_at else None,
-                    "thumbnail_url": thumb,
                 },
             )
         )
@@ -277,7 +260,6 @@ def get_nearby_complaints(
         .join(Complaint.location)
         .options(
             joinedload(Complaint.location),
-            joinedload(Complaint.evidence),
         )
         .filter(
             Complaint.is_public == True,
@@ -299,7 +281,7 @@ def get_nearby_complaints(
 
     candidates = query.all()
 
-    results: list[MapPoint] = []
+    results: list[tuple[float, MapPoint]] = []
     for c in candidates:
         if not c.location:
             continue
@@ -307,26 +289,24 @@ def get_nearby_complaints(
         if dist <= radius_km:
             cat_ml = CATEGORY_ML_MAP.get(c.category, c.category)
             st_ml = STATUS_ML_MAP.get(c.current_status, c.current_status)
-            thumb = get_first_image_url(c.evidence or [])
+            latitude = round(c.location.latitude, 2)
+            longitude = round(c.location.longitude, 2)
+            public_id = hashlib.sha256(
+                f"{c.category}|{latitude:.2f}|{longitude:.2f}|{c.created_at.isoformat()}".encode()
+            ).hexdigest()[:16]
             mp = MapPoint(
-                id=c.id,
-                tracking_code=c.tracking_code,
-                title=c.title,
+                id=public_id,
                 category=c.category,
                 category_display_ml=cat_ml,
                 severity=c.severity,
                 current_status=c.current_status,
                 status_display_ml=st_ml,
-                latitude=c.location.latitude,
-                longitude=c.location.longitude,
+                latitude=latitude,
+                longitude=longitude,
                 district=c.location.district,
-                lsgd_name=c.location.lsgd_name,
-                ward_number=c.location.ward_number,
                 created_at=c.created_at,
-                thumbnail_url=thumb,
-                distance_km=round(dist, 2),
             )
-            results.append(mp)
+            results.append((dist, mp))
 
-    results.sort(key=lambda x: x.distance_km if x.distance_km is not None else 999999.0)
-    return results[:limit]
+    results.sort(key=lambda item: item[0])
+    return [point for _, point in results[:limit]]

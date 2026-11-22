@@ -79,6 +79,7 @@ def test_complete_e2e_user_journey(client: TestClient):
             "password": "CitizenSecure123!",
             "phone": f"+9198{uuid.uuid4().hex[:8]}",
             "preferred_language": "ml",
+            "privacy_consent": True,
         },
     )
     assert reg_res.status_code == 201
@@ -216,7 +217,10 @@ def test_complete_e2e_user_journey(client: TestClient):
     assert tracked_data["tracking_code"] == tracking_code
 
     # Verify complete timeline integrity
-    timeline_res = client.get(f"/api/v1/complaints/{complaint_id}/timeline")
+    timeline_res = client.get(
+        f"/api/v1/complaints/{complaint_id}/timeline",
+        headers={"Authorization": f"Bearer {citizen_token}"},
+    )
     assert timeline_res.status_code == 200
     timeline = timeline_res.json()
     assert len(timeline) >= 4

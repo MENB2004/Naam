@@ -18,6 +18,7 @@ function mapResponseUserToProfile(u: AuthResponse['user']): UserProfile {
     departmentId: u.department_id,
     departmentNameMl: u.department_name_ml,
     isActive: u.is_active,
+    locality: u.locality,
   };
 }
 
@@ -48,6 +49,14 @@ export const authService = {
 
   async getMe(): Promise<UserProfile> {
     const res = await apiRequest<AuthResponse['user']>('/auth/me');
+    return mapResponseUserToProfile(res);
+  },
+
+  async updateMyProfile(payload: { full_name: string; phone?: string; locality?: string }): Promise<UserProfile> {
+    const res = await apiRequest<AuthResponse['user']>('/auth/me/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
     return mapResponseUserToProfile(res);
   },
 

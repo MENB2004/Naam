@@ -6,6 +6,7 @@ def get_auth_token(client, email="citizen.test@example.com"):
         "email": email,
         "phone": f"+9198{suffix}",
         "password": "Password123!",
+        "privacy_consent": True,
     }
     client.post("/api/v1/auth/register", json=reg_payload)
 

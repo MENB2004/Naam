@@ -1,7 +1,5 @@
 export interface MapPoint {
   id: string;
-  tracking_code: string;
-  title: string;
   category: string;
   category_display_ml: string;
   severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'EMERGENCY';
@@ -10,11 +8,7 @@ export interface MapPoint {
   latitude: number;
   longitude: number;
   district: string;
-  lsgd_name: string;
-  ward_number?: string | null;
   created_at: string;
-  thumbnail_url?: string | null;
-  distance_km?: number | null;
 }
 
 export interface MapFilters {

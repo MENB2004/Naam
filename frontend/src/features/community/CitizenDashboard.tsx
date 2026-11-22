@@ -78,6 +78,7 @@ export const CitizenDashboard: React.FC = () => {
 
           <div className="flex items-center space-x-3">
             <NotificationDropdown />
+            <Link to="/community/profile" className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:border-primary hover:text-primary">പ്രൊഫൈൽ</Link>
             <Link to="/community/report">
               <Button variant="primary" size="sm" className="hidden sm:inline-flex bg-[#087C63]">
                 <Plus className="w-4 h-4 mr-1.5" />

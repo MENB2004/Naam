@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
   Navigation,
   PlusCircle,
-  ExternalLink,
   ChevronDown,
   ChevronUp,
   SlidersHorizontal,
@@ -79,7 +78,6 @@ function FlyToController({ target }: { target: [number, number] | null }) {
 }
 
 export const IssueMap: React.FC = () => {
-  const navigate = useNavigate();
   const [points, setPoints] = useState<MapPoint[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,9 +120,7 @@ export const IssueMap: React.FC = () => {
     const s = filters.search.toLowerCase().trim();
     return points.filter(
       (p) =>
-        p.title.toLowerCase().includes(s) ||
-        p.tracking_code.toLowerCase().includes(s) ||
-        p.lsgd_name.toLowerCase().includes(s) ||
+        p.category_display_ml.toLowerCase().includes(s) ||
         p.district.toLowerCase().includes(s)
     );
   }, [points, filters.search]);
@@ -298,49 +294,20 @@ export const IssueMap: React.FC = () => {
             >
               <Popup className="naam-popup" maxWidth={320} minWidth={260}>
               <div className="space-y-2 p-1 text-foreground">
-                  {/* Thumbnail if present */}
-                  {point.thumbnail_url && (
-                    <div className="h-32 w-full overflow-hidden rounded-lg border border-border bg-muted">
-                      <img
-                        src={point.thumbnail_url}
-                        alt={point.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                  )}
-
                   {/* Header badges */}
                   <div className="flex items-center justify-between gap-1 flex-wrap">
-                    <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted-foreground">
-                      {point.tracking_code}
-                    </span>
+                    <span className="text-[10px] font-semibold text-primary">{point.category_display_ml}</span>
                     <StatusBadge status={point.current_status as any} size="sm" />
                   </div>
 
-                  {/* Title in Malayalam */}
-                  <h4 className="text-xs font-bold leading-snug text-foreground">{point.title}</h4>
+                  <h4 className="text-xs font-bold leading-snug text-foreground">പൊതുപരിസ്ഥിതി റിപ്പോർട്ട്</h4>
 
                   {/* Category and Location meta */}
                   <div className="space-y-0.5 text-[11px] text-muted-foreground">
                     <div className="flex items-center space-x-1">
-                      <span className="font-semibold text-primary">വിഭാഗം:</span>
-                      <span>{point.category_display_ml}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <span className="font-semibold text-foreground">തദ്ദേശ സ്ഥാപനം:</span>
-                      <span>{point.lsgd_name}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
                       <span className="font-semibold text-foreground">ജില്ല:</span>
                       <span>{point.district}</span>
-                      {point.ward_number && <span>(വാർഡ് {point.ward_number})</span>}
                     </div>
-                    {point.distance_km !== undefined && point.distance_km !== null && (
-                      <div className="text-[10px] font-bold text-accent">
-                        ദൂരം: {point.distance_km} കി.മീ (km)
-                      </div>
-                    )}
                   </div>
 
                   {/* Severity indicator */}
@@ -360,12 +327,7 @@ export const IssueMap: React.FC = () => {
                       </span>
                     </span>
 
-                    <button
-                      onClick={() => navigate(`/track/${point.tracking_code}`)}
-                      className="inline-flex cursor-pointer items-center text-[11px] font-bold text-primary hover:underline"
-                    >
-                      വിശദാംശങ്ങൾ <ExternalLink className="w-3 h-3 ml-0.5" />
-                    </button>
+                    <time className="text-[10px] text-muted-foreground" dateTime={point.created_at}>{new Date(point.created_at).toLocaleDateString('ml-IN')}</time>
                   </div>
                 </div>
               </Popup>

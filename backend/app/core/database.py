@@ -19,7 +19,7 @@ if "sqlite" in db_url:
     connect_args = {"check_same_thread": False}
 elif "postgres" in db_url:
     # Normalize Postgres / Neon connection URL for pure-Python pg8000 driver
-    if db_url.startswith("postgresql://") or db_url.startswith("postgres://"):
+    if db_url.startswith(("postgresql://", "postgres://")):
         base_part = db_url.split("?")[0]
         if base_part.startswith("postgresql://"):
             db_url = base_part.replace("postgresql://", "postgresql+pg8000://", 1)

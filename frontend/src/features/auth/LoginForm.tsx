@@ -285,6 +285,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ portal }) => {
             {portal === 'community' ? (
               <>
                 <div>അക്കൗണ്ട് ഇല്ലേ?{' '}<Link to="/register" className="font-semibold text-[#087C63] hover:underline">ഇവിടെ സൗജന്യമായി രജിസ്റ്റർ ചെയ്യാം</Link></div>
+                <Link to="/forgot-password" className="font-semibold text-slate-600 hover:text-[#087C63]">പാസ്‌വേഡ് മറന്നോ? · Forgot password?</Link>
                 <a href={(import.meta as any).env?.VITE_OFFICIAL_PORTAL_URL || '/official/login'} className="font-semibold text-slate-600 hover:text-slate-900">ഔദ്യോഗിക പ്രവേശനം · Official Access</a>
               </>
             ) : portal === 'official' ? (

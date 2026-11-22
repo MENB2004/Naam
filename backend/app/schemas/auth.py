@@ -1,14 +1,28 @@
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 
 class UserRegister(BaseModel):
-    full_name: str
+    full_name: str = Field(..., min_length=2, max_length=150)
     email: EmailStr
-    phone: str | None = None
-    password: str
+    phone: str | None = Field(None, max_length=20)
+    password: str = Field(..., min_length=8, max_length=128)
     preferred_language: str | None = "ml"
+    locality: str | None = Field(None, max_length=255)
+    privacy_consent: bool
+
+    @model_validator(mode="after")
+    def require_privacy_consent(self):
+        if not self.privacy_consent:
+            raise ValueError("Privacy policy consent is required")
+        return self
+
+
+class UserProfileUpdate(BaseModel):
+    full_name: str = Field(..., min_length=2, max_length=150)
+    phone: str | None = Field(None, max_length=20)
+    locality: str | None = Field(None, max_length=255)
 
 
 class UserLogin(BaseModel):
@@ -30,6 +44,7 @@ class UserProfile(BaseModel):
     department_name_en: str | None = None
     is_active: bool
     preferred_language: str = "ml"
+    locality: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

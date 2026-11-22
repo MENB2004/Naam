@@ -36,6 +36,20 @@ class AlertOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class PublicAlertOut(BaseModel):
+    id: uuid.UUID
+    title_ml: str
+    title_en: str
+    message_ml: str
+    message_en: str
+    alert_level: str
+    alert_source: str
+    affected_district: str | None = None
+    is_active: bool
+    expires_at: datetime | None = None
+    created_at: datetime
+
+
 class NotificationOut(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID

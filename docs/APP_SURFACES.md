@@ -18,6 +18,14 @@ The frontend now selects one of two route surfaces while reusing the existing Re
 - Authority, Officer, Super Admin, Analytics, and official map routes are only mounted in this surface.
 - Registration is redirected to official sign-in; public registration continues to assign the Community role through the existing backend.
 
+## Community account updates (Phase 3)
+
+- Registration requires explicit privacy notice consent, checks duplicate email/phone values, and records the consent timestamp. A locality field is optional and stored with the profile.
+- Community members can update their name, phone, and locality at `/community/profile`.
+- UUID complaint detail and timeline endpoints require authentication; community users receive a not-found response for another member's record.
+- `/forgot-password` is present, but self-service recovery is intentionally not presented as working until an email delivery and token-verification service is configured. Email verification is likewise still pending that provider integration; current registration retains the existing login behavior.
+- Apply the `20261123_01` Alembic migration before running the updated backend against an existing database.
+
 Set `VITE_OFFICIAL_PORTAL_URL` in the public build to the official portal URL once the production domain is chosen. Set `VITE_PUBLIC_SITE_URL` in the official build to the public website URL.
 
 This route separation is a frontend and navigation boundary. Backend permission enforcement, session hardening, and data-privacy fixes remain required work in later phases; hiding a route in the public bundle is not an authorization control.

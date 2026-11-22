@@ -4,6 +4,7 @@ def test_register_citizen_success(client):
         "email": "anjali.nair@example.com",
         "phone": "+919876543210",
         "password": "StrongPassword123!",
+        "privacy_consent": True,
     }
     response = client.post("/api/v1/auth/register", json=payload)
     assert response.status_code == 201
@@ -13,6 +14,7 @@ def test_register_citizen_success(client):
     assert data["user"]["full_name"] == "Anjali Nair"
     assert data["user"]["role"] == "COMMUNITY"
     assert data["user"]["role_display_ml"] == "പൗരൻ"
+    assert data["user"]["locality"] is None
 
 
 def test_register_duplicate_email_fails(client):
@@ -20,6 +22,7 @@ def test_register_duplicate_email_fails(client):
         "full_name": "Duplicate User",
         "email": "anjali.nair@example.com",
         "password": "Password123!",
+        "privacy_consent": True,
     }
     response = client.post("/api/v1/auth/register", json=payload)
     assert response.status_code == 400

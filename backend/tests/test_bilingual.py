@@ -14,6 +14,7 @@ def test_bilingual_registration_and_preference(client: TestClient):
             "phone": f"+9198{suffix[:8]}",
             "password": "Password123!",
             "preferred_language": "ml",
+            "privacy_consent": True,
         },
     )
     assert res.status_code == 201

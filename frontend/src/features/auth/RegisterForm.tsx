@@ -6,7 +6,6 @@ import {
   Phone,
   Lock,
   AlertCircle,
-  CheckCircle2,
   ArrowRight,
   ShieldCheck,
 } from 'lucide-react';
@@ -26,6 +25,8 @@ export const RegisterForm: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [locality, setLocality] = useState('');
+  const [privacyConsent, setPrivacyConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -42,6 +43,10 @@ export const RegisterForm: React.FC = () => {
       setErrorMessage('പാസ്‌വേഡിൽ കുറഞ്ഞത് 8 അക്ഷരങ്ങൾ ഉണ്ടായിരിക്കണം (Minimum 8 characters).');
       return;
     }
+    if (!privacyConsent) {
+      setErrorMessage('തുടരാൻ സ്വകാര്യതാ അറിയിപ്പിനുള്ള സമ്മതം ആവശ്യമാണ് (Privacy policy consent is required).');
+      return;
+    }
 
     setIsLoading(true);
 
@@ -51,25 +56,17 @@ export const RegisterForm: React.FC = () => {
         email: email.trim(),
         phone: phone.trim() || undefined,
         password,
+        locality: locality.trim() || undefined,
+        privacy_consent: privacyConsent,
       });
 
       setAuth(data.user, data.accessToken, data.refreshToken);
-      navigate('/community');
+      navigate('/community/dashboard');
     } catch (err: any) {
       setErrorMessage(err.message || 'രജിസ്ട്രേഷൻ പരാജയപ്പെട്ടു. വിവരങ്ങൾ ശരിയാണോ എന്ന് പരിശോധിക്കുക.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleApplyDemoData = () => {
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    setFullName('ഹരികുമാർ പി.');
-    setEmail(`harikumar.${randomSuffix}@example.com`);
-    setPhone('+919847123456');
-    setPassword('StrongPassword123!');
-    setConfirmPassword('StrongPassword123!');
-    setErrorMessage(null);
   };
 
   return (
@@ -106,6 +103,13 @@ export const RegisterForm: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  പ്രദേശം / പൊതുവായ വിലാസം (Locality - optional)
+                </label>
+                <Input type="text" maxLength={255} placeholder="നഗരം / പഞ്ചായത്ത് / പ്രദേശം" value={locality} onChange={(e) => setLocality(e.target.value)} />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   പൂർണ്ണ നാമം (Full Name)
                 </label>
                 <div className="relative">
@@ -122,6 +126,11 @@ export const RegisterForm: React.FC = () => {
                   />
                 </div>
               </div>
+
+              <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-relaxed text-slate-700">
+                <input type="checkbox" required checked={privacyConsent} onChange={(e) => setPrivacyConsent(e.target.checked)} className="mt-0.5 accent-[#087C63]" />
+                <span>എന്റെ അക്കൗണ്ടും റിപ്പോർട്ടുകളും കൈകാര്യം ചെയ്യുന്നതിനായി നൽകിയ വിവരങ്ങൾ ഉപയോഗിക്കുന്നതിനെക്കുറിച്ചുള്ള <Link to="/privacy" target="_blank" className="font-semibold text-[#087C63] underline">സ്വകാര്യതാ അറിയിപ്പ്</Link> ഞാൻ വായിച്ച് സമ്മതിക്കുന്നു.</span>
+              </label>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -208,21 +217,6 @@ export const RegisterForm: React.FC = () => {
               </Button>
             </form>
 
-            <div className="mt-4 pt-3 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={handleApplyDemoData}
-                className="w-full text-xs text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 p-2 rounded-lg border border-slate-200 flex items-center justify-between transition"
-              >
-                <span className="flex items-center text-left">
-                  <CheckCircle2 className="w-3.5 h-3.5 mr-2 text-emerald-600 flex-shrink-0" />
-                  <span>സാമ്പിൾ വിവരങ്ങൾ നിറയ്ക്കുക (Demo Auto-fill)</span>
-                </span>
-                <span className="text-[10px] font-semibold text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
-                  ടെസ്റ്റ് ഡാറ്റ
-                </span>
-              </button>
-            </div>
           </CardContent>
 
           <CardFooter className="flex justify-center py-3 text-xs text-slate-500 border-t border-slate-100 bg-slate-50/50 rounded-b-xl">

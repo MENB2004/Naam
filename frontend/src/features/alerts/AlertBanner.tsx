@@ -9,10 +9,10 @@ import {
   Volume2,
 } from 'lucide-react';
 import { alertService } from '../../services/alertService';
-import { Alert } from '../../types/alert';
+import { PublicAlert } from '../../types/alert';
 
 export const AlertBanner: React.FC = () => {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [alerts, setAlerts] = useState<PublicAlert[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [dismissed, setDismissed] = useState<boolean>(false);
   const [expanded, setExpanded] = useState<boolean>(false);
@@ -164,7 +164,6 @@ export const AlertBanner: React.FC = () => {
           </div>
           <div className="mt-2 text-[10px] text-white/80 flex justify-between items-center">
             <span>പുറപ്പെടുവിച്ച തീയതി: {new Date(currentAlert.created_at).toLocaleString('ml-IN')}</span>
-            {currentAlert.creator_name && <span>ഉദ്യോഗസ്ഥൻ: {currentAlert.creator_name}</span>}
           </div>
         </div>
       )}

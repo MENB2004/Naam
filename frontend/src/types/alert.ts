@@ -1,6 +1,8 @@
 export type AlertLevel = 'INFO' | 'WARNING' | 'CRITICAL';
 export type AlertSource = 'OFFICIAL_WARNING' | 'COMMUNITY_REPORT' | 'SIMULATED_DEMO_ALERT';
 
+export type PublicAlert = Omit<Alert, 'created_by' | 'creator_name'>;
+
 export interface Alert {
   id: string;
   title_ml: string;

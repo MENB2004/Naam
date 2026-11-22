@@ -1,18 +1,19 @@
 import { apiRequest } from './api';
 import {
   Alert,
+  PublicAlert,
   AlertCreatePayload,
   Notification,
   NotificationListResponse,
 } from '../types/alert';
 
 export const alertService = {
-  getAlerts: async (district?: string, includeAll: boolean = false): Promise<Alert[]> => {
+  getAlerts: async (district?: string, includeAll: boolean = false): Promise<PublicAlert[]> => {
     const query = new URLSearchParams();
     if (district && district !== 'ALL') query.append('district', district);
     if (includeAll) query.append('include_all', 'true');
     const qs = query.toString() ? `?${query.toString()}` : '';
-    return apiRequest<Alert[]>(`/alerts${qs}`);
+    return apiRequest<PublicAlert[]>(`/alerts${qs}`);
   },
 
   broadcastAlert: async (payload: AlertCreatePayload): Promise<Alert> => {

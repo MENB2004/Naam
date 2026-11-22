@@ -116,7 +116,10 @@ def test_authority_officer_assignment_and_resolution_flow(client):
     assert any(e["evidence_type"] == "FIELD_RESOLUTION_PROOF" for e in resolved_data["evidence"])
 
     # 8. Verify timeline reflects assignment, progress, and resolution
-    timeline_res = client.get(f"/api/v1/complaints/{complaint_id}/timeline")
+    timeline_res = client.get(
+        f"/api/v1/complaints/{complaint_id}/timeline",
+        headers={"Authorization": f"Bearer {authority_token}"},
+    )
     assert timeline_res.status_code == 200
     timeline = timeline_res.json()
     statuses = [t["new_status"] for t in timeline]
