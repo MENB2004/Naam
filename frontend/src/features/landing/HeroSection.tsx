@@ -43,6 +43,9 @@ export function HeroSection() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const dashboardPath = dashboardPathForRole(user?.role);
   const reducedMotion = useReducedMotion();
+  const navClassName = language === 'ml'
+    ? 'hidden min-w-0 flex-1 items-center justify-center gap-3 text-xs text-muted-foreground 2xl:flex 2xl:gap-4 2xl:text-sm'
+    : 'hidden min-w-0 flex-1 items-center justify-center gap-4 text-sm text-muted-foreground 2xl:flex 2xl:gap-6';
   const t = {
     nav: translate('hero.nav', { returnObjects: true }) as string[],
     badge: translate('hero.badge'), headingA: translate('hero.headingA'), headingB: translate('hero.headingB'),
@@ -59,21 +62,21 @@ export function HeroSection() {
 
   return <section id="home" className="relative flex min-h-screen min-h-[100svh] flex-col overflow-hidden bg-background">
     <LandscapeBackdrop />
-    <header className="relative z-30 flex shrink-0 items-center justify-between px-5 py-4 md:px-12 md:py-5 lg:px-20">
-      <Logo height={40} className="h-9 md:h-11" />
-      <nav lang={language} aria-label="Main navigation" className="hidden items-center gap-5 text-sm text-muted-foreground lg:flex xl:gap-7">
+    <header className="relative z-30 flex shrink-0 items-center justify-between gap-3 px-5 py-4 md:px-12 md:py-5 lg:px-20">
+      <Logo height={40} className="h-9 shrink-0 md:h-11" />
+      <nav lang={language} aria-label="Main navigation" className={navClassName}>
         {t.nav.map((label, i) => i === 4
           ? <Link key={label} to="/map" className="whitespace-nowrap transition-colors hover:text-primary">{label}</Link>
           : <a key={label} href={links[i]} className="whitespace-nowrap transition-colors hover:text-primary">{label}</a>)}
       </nav>
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex shrink-0 items-center gap-2 md:gap-3">
         {isAuthenticated && user && <div className="hidden items-center gap-2 md:flex"><span className="max-w-36 truncate text-xs text-muted-foreground">{user.fullName}</span><button type="button" onClick={() => logout()} aria-label={translate('hero.logout')} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-white/60 text-muted-foreground hover:text-primary"><LogOut size={15}/></button></div>}
         <div className="hidden sm:block"><LanguageSwitcher currentLang={language} onLanguageChange={changeLanguage} className="border-border/80 bg-background/80 text-foreground shadow-none"/></div>
-        <Link to={isAuthenticated && user ? dashboardPath : '/login'} className="hidden rounded-full border border-border bg-background/80 px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-muted sm:inline-flex">{translate(isAuthenticated && user ? 'hero.dashboard' : 'hero.signIn')}</Link>
-        <button type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(v => !v)} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-background/80 text-foreground lg:hidden">{menuOpen ? <X size={18}/> : <Menu size={18}/>}</button>
-        <button type="button" onClick={() => navigate('/community/report')} className="hidden rounded-full bg-primary px-4 py-2.5 text-xs font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90 sm:inline-flex md:px-5 md:text-sm">{language === 'ml' ? 'റിപ്പോർട്ട് ചെയ്യുക' : 'Report an Issue'}</button>
+        <Link to={isAuthenticated && user ? dashboardPath : '/login'} className="hidden whitespace-nowrap rounded-full border border-border bg-background/80 px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-muted sm:inline-flex">{translate(isAuthenticated && user ? 'hero.dashboard' : 'hero.signIn')}</Link>
+        <button type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(v => !v)} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-background/80 text-foreground 2xl:hidden">{menuOpen ? <X size={18}/> : <Menu size={18}/>}</button>
+        <button type="button" onClick={() => navigate('/community/report')} className="hidden whitespace-nowrap rounded-full bg-primary px-4 py-2.5 text-xs font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90 sm:inline-flex md:px-5 md:text-sm">{language === 'ml' ? 'റിപ്പോർട്ട് ചെയ്യുക' : 'Report an Issue'}</button>
       </div>
-      <AnimatePresence>{menuOpen && <motion.div initial={reducedMotion ? false : {opacity:0,y:-8}} animate={{opacity:1,y:0}} exit={reducedMotion ? undefined : {opacity:0,y:-8}} transition={{duration:reducedMotion ? 0 : .18}} className="absolute left-4 right-4 top-[calc(100%-4px)] z-40 rounded-2xl border border-border bg-background/95 p-3 shadow-xl backdrop-blur-xl lg:hidden">
+      <AnimatePresence>{menuOpen && <motion.div initial={reducedMotion ? false : {opacity:0,y:-8}} animate={{opacity:1,y:0}} exit={reducedMotion ? undefined : {opacity:0,y:-8}} transition={{duration:reducedMotion ? 0 : .18}} className="absolute left-4 right-4 top-[calc(100%-4px)] z-40 rounded-2xl border border-border bg-background/95 p-3 shadow-xl backdrop-blur-xl 2xl:hidden">
         <nav lang={language} className="flex flex-col">{t.nav.map((label,i)=>i===4?<Link key={label} to="/map" onClick={()=>setMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted">{label}</Link>:<a key={label} href={links[i]} onClick={()=>setMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-muted">{label}</a>)}</nav>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3"><LanguageSwitcher currentLang={language} onLanguageChange={changeLanguage}/><div className="flex flex-wrap items-center gap-2">{isAuthenticated && user && <button type="button" onClick={() => logout()} className="rounded-full border border-border px-3 py-2 text-[11px] text-muted-foreground">{translate('hero.logout')}</button>}<Link to={isAuthenticated && user ? dashboardPath : '/login'} onClick={()=>setMenuOpen(false)} className="rounded-full border border-border px-3 py-2 text-[11px] font-semibold text-foreground">{translate(isAuthenticated && user ? 'hero.dashboard' : 'hero.signIn')}</Link><a href={officialPortalUrl} className="rounded-full border border-border px-3 py-2 text-[11px] font-semibold text-muted-foreground">{translate('hero.officialAccess')}</a><button type="button" onClick={()=>navigate('/community/report')} className="rounded-full bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground">{t.report}</button></div></div>
       </motion.div>}</AnimatePresence>
