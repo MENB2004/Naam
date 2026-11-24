@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Activity, AlertTriangle, Check, FileText, RefreshCw } from 'lucide-react';
+import { Logo } from '../../components/common/Logo';
 import { usePublicSummary } from './PublicSummaryContext';
 
 const CATEGORY_NAMES: Record<string, { en: string; ml: string }> = {
@@ -42,7 +43,7 @@ export function EnvironmentalDashboardPreview() {
   return (
     <section aria-label={isMalayalam ? 'NAAM തത്സമയ പൊതുഡാഷ്ബോർഡ്' : 'NAAM live public dashboard'} className="dashboard-preview overflow-hidden rounded-xl bg-background text-foreground">
       <div className="flex items-center justify-between gap-3 border-b border-border/70 px-3 py-3 md:px-5">
-        <div className="flex items-center gap-2 text-xs font-semibold"><span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-white"><Activity size={15}/></span><span>NAAM <span className="ml-1 ml-body text-muted-foreground">നാം</span></span></div>
+        <Logo height={30} showLink={false} className="shrink-0" />
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
           <span className={`h-2 w-2 rounded-full ${hasError ? 'bg-warning' : summary ? 'bg-primary' : 'bg-muted-foreground'}`} />
           <span>{hasError ? (isMalayalam ? 'അപ്‌ഡേറ്റ് ലഭ്യമല്ല' : 'Update unavailable') : (isMalayalam ? 'തത്സമയ പൊതുവിവരങ്ങൾ' : 'Live public data')}</span>
