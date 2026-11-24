@@ -1,4 +1,5 @@
-const API_BASE = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000/api/v1';
+// Use the same-origin proxy by default (Vite in development, Vercel/Nginx in deployment).
+const API_BASE = (import.meta as any).env?.VITE_API_URL || '/api/v1';
 
 function getErrorMessage(data: any, status: number): string {
   const detail = data?.detail;

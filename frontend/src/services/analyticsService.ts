@@ -30,7 +30,7 @@ export const analyticsService = {
 
   downloadReport: async (format: 'csv' | 'json' = 'csv'): Promise<void> => {
     const token = localStorage.getItem('naam_access_token');
-    const apiBase = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000/api/v1';
+    const apiBase = (import.meta as any).env?.VITE_API_URL || '/api/v1';
     const url = `${apiBase}/analytics/export?format=${format}`;
 
     const headers: Record<string, string> = {};
