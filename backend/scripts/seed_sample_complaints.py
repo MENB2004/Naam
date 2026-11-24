@@ -1,6 +1,10 @@
 import sys
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
+
+# Allow `python scripts/seed_sample_complaints.py` from the backend directory.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from sqlalchemy import select
 from geoalchemy2.functions import ST_SetSRID, ST_MakePoint

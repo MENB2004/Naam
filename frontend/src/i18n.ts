@@ -38,6 +38,7 @@ const resources = {
         liveMap: 'ലൈവ് മാപ്പ്',
         logout: 'ലോഗ് ഔട്ട്',
         signIn: 'പ്രവേശിക്കുക',
+        dashboard: 'എന്റെ ഡാഷ്ബോർഡ്',
         officialAccess: 'ഔദ്യോഗിക പ്രവേശനം',
       },
       landing: {
@@ -89,6 +90,7 @@ const resources = {
         liveMap: 'Live Map',
         logout: 'Log out',
         signIn: 'Sign in',
+        dashboard: 'My dashboard',
         officialAccess: 'Official Access',
       },
       landing: {

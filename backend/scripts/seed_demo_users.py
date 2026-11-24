@@ -9,6 +9,10 @@ be seeded into a production PostgreSQL database by accident.
 
 import sys
 import uuid
+from pathlib import Path
+
+# Allow `python scripts/seed_demo_users.py` from the backend directory.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from seed_master_data import seed_master_data
 from sqlalchemy import select

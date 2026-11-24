@@ -1,4 +1,9 @@
+import sys
 import uuid
+from pathlib import Path
+
+# Allow `python scripts/seed_master_data.py` from the backend directory.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from sqlalchemy import select
 

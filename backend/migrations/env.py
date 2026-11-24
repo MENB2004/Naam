@@ -1,4 +1,5 @@
 from logging.config import fileConfig
+import ssl
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
@@ -40,13 +41,18 @@ def do_run_migrations(connection: Connection) -> None:
 def run_sync_migrations() -> None:
     configuration = config.get_section(config.config_ini_section, {})
     database_url = make_url(settings.DATABASE_URL)
+    connect_args = {}
     if database_url.get_backend_name() == "postgresql":
-        database_url = database_url.set(drivername="postgresql+pg8000")
+        # Match the app's Neon/pg8000 connection handling: pg8000 uses an
+        # SSLContext instead of libpq's sslmode/channel_binding URL options.
+        database_url = database_url.set(drivername="postgresql+pg8000", query={})
+        connect_args["ssl_context"] = ssl.create_default_context()
     configuration["sqlalchemy.url"] = str(database_url)
 
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
+        connect_args=connect_args,
         poolclass=pool.NullPool,
     )
 
